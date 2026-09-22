@@ -1,0 +1,6 @@
+{
+  "name": "AppIntro & Avatar Studio",
+  "description": "Create high-quality UI art, consistent avatar figures, 1K-4K backgrounds, modulated voices, and music organized in project folders with style priming pumps for web and mobile apps.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

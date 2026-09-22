@@ -1,0 +1,45 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account and profile details",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["uid", "email"]
+    },
+    "ProjectFolder": {
+      "title": "ProjectFolder",
+      "description": "An organized project folder holding creative assets, intro scenes, and style primer",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" },
+        "stylePrimer": { "type": "object" },
+        "assets": { "type": "array" },
+        "currentStudioState": { "type": "object" }
+      },
+      "required": ["id", "userId", "name"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Stores user profile data"
+    },
+    "/users/{userId}/projects/{projectId}": {
+      "schema": "ProjectFolder",
+      "description": "User's isolated project folders containing assets and intro configs"
+    }
+  }
+}
