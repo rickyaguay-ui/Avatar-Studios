@@ -668,13 +668,13 @@ export default function App() {
       setActiveProjectId(projId);
       setProject(newFolder.currentStudioState);
 
-      if (user) {
-        saveProjectToFirestore(user.uid, newFolder).catch((err) =>
+      if (currentUser) {
+        saveProjectToFirestore(currentUser.uid, newFolder).catch((err) =>
           console.warn('Firestore sync warning:', err)
         );
       }
     },
-    [project, user]
+    [project, currentUser]
   );
 
   const handleApplyAiPrompt = (promptText: string) => {
