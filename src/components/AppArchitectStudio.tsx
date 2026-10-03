@@ -181,15 +181,14 @@ export function AppArchitectStudio({
   // Apply single avatar to active studio
   const handleApplyAvatarToStudio = (avatar: AppArchitectAvatar) => {
     onApplyStudioState({
-      avatarName: avatar.name,
-      avatarHairstyle: avatar.hairstyle,
-      avatarClothingTop: avatar.clothingTop,
-      voiceActor: avatar.voice,
+      hairstyle: avatar.hairstyle,
+      clothingTop: avatar.clothingTop,
+      selectedVoice: avatar.voice,
       voicePitch: avatar.voicePitch,
       voiceSpeed: avatar.voiceSpeed,
       speechEmotion: avatar.speechEmotion,
       dialogueText: avatar.dialogueIntro,
-      ...(avatar.imageUrl ? { avatarImageUrl: avatar.imageUrl } : {}),
+      ...(avatar.imageUrl ? { avatarUrl: avatar.imageUrl } : {}),
     });
     setAppliedNotice(`Loaded "${avatar.name}" with ${avatar.voice} voice into studio!`);
     setTimeout(() => setAppliedNotice(null), 3000);
@@ -199,8 +198,8 @@ export function AppArchitectStudio({
   const handleApplySceneToStudio = (scene: AppArchitectScene) => {
     onApplyStudioState({
       backgroundPrompt: scene.prompt,
-      backgroundAspectRatio: scene.aspectRatio,
-      ...(scene.imageUrl ? { backgroundImageUrl: scene.imageUrl } : {}),
+      backgroundAspect: scene.aspectRatio,
+      ...(scene.imageUrl ? { backgroundUrl: scene.imageUrl } : {}),
     });
     setAppliedNotice(`Set "${scene.name}" as studio backdrop!`);
     setTimeout(() => setAppliedNotice(null), 3000);
