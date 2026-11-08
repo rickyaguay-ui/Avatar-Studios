@@ -1,0 +1,8 @@
+# Never upload secrets or local-only files to Vercel (the CLI does not skip .env by default).
+.env
+.env*
+projects_data.json
+firebase-applet-config.json
+.image-originals
+dist
+dist-demo
