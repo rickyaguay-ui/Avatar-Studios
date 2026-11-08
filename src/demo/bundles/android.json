@@ -2,18 +2,110 @@
   "id": "android",
   "label": "Android app intro",
   "brand": "R&B's Homesteading",
-  "durationSec": 25,
+  "durationSec": 33.8,
   "cues": [
-    { "at": 0, "voiceover": "", "onScreen": "R&B's Homesteading", "screen": "splash" },
-    { "at": 1, "voiceover": "This app puts your whole homestead in one view. Start with water: how full the cistern is, and how many days that lasts.", "onScreen": "Know your water | Cistern 72% | 41 days", "screen": "card1" },
-    { "at": 9, "voiceover": "Then power: what the panels made today, and what's left in the battery.", "onScreen": "Know your power | 6.2 kWh today | Battery 84%", "screen": "card2" },
-    { "at": 15, "voiceover": "Then heat: how far the greenhouse swung last night, so you know the berm is doing its job.", "onScreen": "Know your heat | Low 58F | High 74F", "screen": "card3" },
-    { "at": 22, "voiceover": "Your water, power, and heat. One app.", "onScreen": "Get started", "screen": "end" }
+    {
+      "at": 0,
+      "voiceover": "",
+      "onScreen": "R&B's Homesteading",
+      "screen": "logo"
+    },
+    {
+      "at": 1.2,
+      "voiceover": "Every off-grid home runs on six systems. R&B's Homesteading keeps all six in your pocket.",
+      "onScreen": "Six systems. One app."
+    },
+    {
+      "at": 7.6,
+      "voiceover": "Shelter: earth-packed walls that swing less than the air outside.",
+      "onScreen": "1. Shelter"
+    },
+    {
+      "at": 11.9,
+      "voiceover": "Heat: a wall of glass that faces the winter sun.",
+      "onScreen": "2. Heat"
+    },
+    {
+      "at": 15.5,
+      "voiceover": "Power: sun and wind, stored in a battery bank.",
+      "onScreen": "3. Power"
+    },
+    {
+      "at": 19.2,
+      "voiceover": "Water: rain off the roof, caught in a cistern and used four times.",
+      "onScreen": "4. Water"
+    },
+    {
+      "at": 24.0,
+      "voiceover": "Waste: treated right on site.",
+      "onScreen": "5. Waste"
+    },
+    {
+      "at": 26.5,
+      "voiceover": "Food: growing beds built into the house.",
+      "onScreen": "6. Food"
+    },
+    {
+      "at": 29.5,
+      "voiceover": "Six systems. One app. Install R&B's Homesteading.",
+      "onScreen": "Install the app"
+    }
   ],
-  "avatar": { "seed": "rb-homestead-android", "options": { "headVariant": ["short2"], "expressionVariant": ["calm"], "skinColor": ["d08b5b"], "clothingColor": ["ffcf77"] } },
-  "portraits": { "mesa": "/demo/portraits/mesa-android.png", "reed": "/demo/portraits/reed-android.png" },
+  "avatar": {
+    "seed": "rb-homestead-android",
+    "options": {
+      "headVariant": [
+        "short2"
+      ],
+      "expressionVariant": [
+        "calm"
+      ],
+      "skinColor": [
+        "d08b5b"
+      ],
+      "clothingColor": [
+        "ffcf77"
+      ]
+    }
+  },
+  "portraits": {
+    "mesa": "/demo/portraits/mesa-android.png",
+    "reed": "/demo/portraits/reed-android.png"
+  },
   "backdrop": "/demo/video/bg-android.png",
   "video": "/demo/video/clip-android.mp4",
-  "voices": { "mesa": "/demo-audio/android-mesa.mp3", "reed": "/demo-audio/android-reed.mp3" },
-  "extra": { "note": "Synthetic demo numbers; no real data." }
+  "voices": {
+    "mesa": "/demo-audio/android-mesa.mp3",
+    "reed": "/demo-audio/android-reed.mp3"
+  },
+  "extra": {
+    "leadSilenceSec": 1.2,
+    "cards": [
+      {
+        "title": "Shelter",
+        "text": "Natural and repurposed materials; earth-sheltered walls swing less than air."
+      },
+      {
+        "title": "Heat",
+        "text": "Glass wall faces the equator for winter sun; roof and north, east, west walls are heavily insulated."
+      },
+      {
+        "title": "Power",
+        "text": "Solar and wind power the house."
+      },
+      {
+        "title": "Water",
+        "text": "Roof water is harvested into a cistern and reused in stages."
+      },
+      {
+        "title": "Waste",
+        "text": "Sewage is treated on site."
+      },
+      {
+        "title": "Food",
+        "text": "Food production is built into the design."
+      }
+    ],
+    "note": "Clips start with 1.2 s of silence so the logo lands before the voice. Cue times come from the pauses in both clips."
+  }
 }

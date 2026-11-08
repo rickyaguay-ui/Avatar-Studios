@@ -6,7 +6,7 @@ export interface Cue {
   at: number;            // seconds from start (nominal, scaled to real clip length)
   voiceover: string;
   onScreen: string;
-  screen?: string;       // android: splash | card1..3 | end
+  screen?: string;       // android: 'logo' = opening logo slam (no voice)
 }
 
 export interface AvatarConfig {

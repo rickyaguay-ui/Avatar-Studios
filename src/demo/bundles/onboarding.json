@@ -1,27 +1,27 @@
 [
-  { "id": 1, "title": "Meet the hosts", "host": "mesa", "clip": "/demo-audio/onboarding-1.mp3", "talkingHead": "/demo/video/onboarding-1.mp4",
+  { "id": 1, "title": "Meet the hosts", "host": "mesa", "clip": "/demo-audio/onboarding-1.mp3",
     "text": "Hey, AI class! I'm Mesa, and this is Reed. Fair warning: neither of us is real. Ricky made us, and the app you're about to see.",
     "covers": [{ "step": "Studio", "what": "One workspace for intro content. The hosts in it are fictional avatars." }] },
-  { "id": 2, "title": "The problem", "host": "reed", "clip": "/demo-audio/onboarding-2.mp3", "talkingHead": "/demo/video/onboarding-2.mp4",
-    "text": "Here's the problem. Making content for one project usually takes four tools: one for voice, one for video, one for images, one for design. Four logins. Four bills.",
-    "covers": [{ "step": "Why", "what": "Four tools, four logins, four bills, replaced by one flow." }] },
-  { "id": 3, "title": "The studio", "host": "mesa", "clip": "/demo-audio/onboarding-3.mp3", "talkingHead": "/demo/video/onboarding-3.mp4",
+  { "id": 2, "title": "The problem", "host": "reed", "clip": "/demo-audio/onboarding-2.mp3",
+    "text": "Here's the problem. An intro like this one takes three different AIs: one for faces, one for voices, one for video. Three sites. Three logins. Three API keys.",
+    "covers": [{ "step": "Why", "what": "Three AIs, three logins, three API keys, brought into one app." }] },
+  { "id": 3, "title": "The studio", "host": "mesa", "clip": "/demo-audio/onboarding-3.mp3",
     "text": "Avatar Studios puts all of that in one place. Pick where it's going, an Android app, a website, or TikTok, and the studio shapes the avatar, script, voice, and export to fit.",
     "covers": [
       { "step": "1. Format", "what": "Choose Android app, PWA web, or TikTok / Reels. The device frame changes in place." },
       { "step": "2. Avatar", "what": "Customize a DiceBear Open Peeps avatar, or pick a curated portrait." },
       { "step": "3. Voice", "what": "Choose Mesa or Reed to narrate." }
     ] },
-  { "id": 4, "title": "How we were made", "host": "reed", "clip": "/demo-audio/onboarding-4.mp3", "talkingHead": "/demo/video/onboarding-4.mp4",
-    "text": "Here's how we were made. Our faces came from Google Flow. Our voices came from ElevenLabs. Hedra made our mouths move. And Claude Code rebuilt the app around us.",
+  { "id": 4, "title": "How we were made", "host": "reed", "clip": "/demo-audio/onboarding-4.mp3",
+    "text": "Here's how we were made. Our faces came from Google Flow. Our voices came from ElevenLabs. Claude Code rebuilt the app around us. And next, Hedra will make our mouths move.",
     "covers": [{ "step": "6. Integrations", "what": "Gemini, ElevenLabs and Hedra: what each powers and whether it is configured." }] },
-  { "id": 5, "title": "Preloaded, not live", "host": "mesa", "clip": "/demo-audio/onboarding-5.mp3", "talkingHead": "/demo/video/onboarding-5.mp4",
+  { "id": 5, "title": "Preloaded, not live", "host": "mesa", "clip": "/demo-audio/onboarding-5.mp3",
     "text": "One more thing. Everything in this demo is preloaded, so nothing can break on a live call. Plug in the API keys, and these same screens make brand-new content.",
     "covers": [
       { "step": "4. Preview", "what": "Play the intro with captions inside the device frame." },
       { "step": "5. Export", "what": "Copy the prompt bundle and the platform specs." }
     ] },
-  { "id": 6, "title": "The example", "host": "reed", "clip": "/demo-audio/onboarding-6.mp3", "talkingHead": "/demo/video/onboarding-6.mp4",
+  { "id": 6, "title": "The example", "host": "reed", "clip": "/demo-audio/onboarding-6.mp3",
     "text": "To show you, we made one brand: R&B's Homesteading. Off-grid living. Same story, three platforms. Let's go.",
     "covers": [{ "step": "Example", "what": "One brand, R&B's Homesteading, told as an Android intro, a PWA page, and a TikTok / Reels short." }] }
 ]

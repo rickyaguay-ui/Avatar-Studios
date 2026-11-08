@@ -200,7 +200,8 @@ export function PreviewStep() {
   return (
     <div className="grid lg:grid-cols-[1fr_320px] gap-6">
       <div className="flex flex-col items-center gap-4 p-4 rounded-xl bg-ink-900 border border-ink-700">
-        <Frame ex={ex} cue={p.cue} avatarSvg={svg} portrait={portrait} playing={p.playing} showSafe={safe && ex.id === 'tiktok'} />
+        <Frame ex={ex} cue={p.cue} avatarSvg={svg} portrait={portrait} playing={p.playing} showSafe={safe && ex.id === 'tiktok'}
+          onStep={p.step} onCue={(i) => i >= 0 && p.seek(ex.cues[i].at)} />
         <div className="w-full max-w-xl rounded-lg bg-black/60 border border-ink-700 px-4 py-3 text-center text-sm text-ink-50 min-h-[3.5rem]" aria-live="polite" aria-label="Captions">
           {p.cue.voiceover || <span className="text-ink-400">(no narration)</span>}
         </div>

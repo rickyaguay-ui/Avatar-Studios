@@ -8,7 +8,8 @@ const data = steps as unknown as OnboardingStep[];
 const HOST_NAME: Record<HostId, string> = { mesa: 'Mesa', reed: 'Reed' };
 const PORTRAIT: Record<HostId, string> = { mesa: '/demo/portraits/mesa-tiktok.png', reed: '/demo/portraits/reed-tiktok.png' };
 
-/** One host panel. Shows the portrait; if a lip-sync clip exists for the active line it plays on top (muted; audio comes from the narration clip). */
+/** One host panel. Shows the portrait; while its host is speaking it gets a slow zoom and a pulsing gold ring.
+ *  If a lip-sync clip exists for the active line it plays on top (muted; audio comes from the narration clip). */
 function HostPanel({ host, active, talkingHead, speaking }: { host: HostId; active: boolean; talkingHead?: string; speaking: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [ok, setOk] = useState(false);
@@ -19,12 +20,18 @@ function HostPanel({ host, active, talkingHead, speaking }: { host: HostId; acti
   }, [active, speaking, ok]);
   return (
     <div className={`relative flex-1 rounded-xl overflow-hidden border-2 transition-all ${active ? 'border-gold-400' : 'border-ink-700 opacity-60'}`} style={{ aspectRatio: '9 / 14' }}>
-      <Img src={PORTRAIT[host]} alt={`${HOST_NAME[host]} portrait`} className="absolute inset-0 w-full h-full object-cover" />
+      <Img src={PORTRAIT[host]} alt={`${HOST_NAME[host]} portrait`}
+        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[8000ms] ease-out motion-reduce:transition-none ${active && speaking ? 'scale-110' : 'scale-100'}`} />
       {active && talkingHead && (
         <video ref={ref} src={talkingHead} muted playsInline preload="auto" onLoadedData={() => setOk(true)}
           className={`absolute inset-0 w-full h-full object-cover ${ok ? '' : 'hidden'}`} />
       )}
-      <div className="absolute bottom-0 inset-x-0 bg-black/60 text-center text-xs py-1 text-ink-50">{HOST_NAME[host]}</div>
+      {active && speaking && (
+        <div aria-hidden="true" className="absolute inset-0 rounded-xl ring-2 ring-inset ring-gold-400/70 animate-pulse motion-reduce:animate-none pointer-events-none" />
+      )}
+      <div className="absolute bottom-0 inset-x-0 bg-black/60 text-center text-xs py-1 text-ink-50">
+        {HOST_NAME[host]}{active && speaking && <span className="text-gold-400"> · speaking</span>}
+      </div>
     </div>
   );
 }

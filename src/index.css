@@ -38,3 +38,12 @@ body {
 @keyframes backdrop-zoom { from { transform: scale(1); } to { transform: scale(1.12); } }
 .backdrop-zoom { animation: backdrop-zoom 24s ease-in-out infinite alternate; }
 @media (prefers-reduced-motion: reduce) { .backdrop-zoom { animation: none; } }
+
+/* R&B logo slam (Android intro opening): drops in big, overshoots, the screen shakes, a dust ring spreads. */
+@keyframes logo-slam { 0% { transform: scale(3.2); opacity: 0; filter: blur(6px); } 55% { transform: scale(0.93); opacity: 1; filter: blur(0); } 75% { transform: scale(1.04); } 100% { transform: scale(1); } }
+@keyframes impact-shake { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-4px, 3px); } 40% { transform: translate(4px, -2px); } 60% { transform: translate(-3px, 1px); } 80% { transform: translate(2px, -1px); } }
+@keyframes dust-ring { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(1.9); opacity: 0; } }
+.logo-slam { animation: logo-slam 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.impact-shake { animation: impact-shake 0.35s ease-out 0.3s both; }
+.dust-ring { opacity: 0; animation: dust-ring 0.7s ease-out 0.3s forwards; }
+@media (prefers-reduced-motion: reduce) { .logo-slam, .impact-shake, .dust-ring { animation: none; } .dust-ring { display: none; } }
