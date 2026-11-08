@@ -2,16 +2,11 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import http from 'http';
-import { fileURLToPath } from 'url';
-import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { WebSocketServer, WebSocket } from 'ws';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = 3000;
@@ -404,6 +399,9 @@ async function parseImageToPart(imageUrl: string): Promise<{ inlineData: { mimeT
 
 // 2. High-Quality Image Generation & Editing using gemini-3.1-flash-image-preview
 app.post('/api/generate-image', async (req, res) => {
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(503).json({ error: 'Gemini API key not configured. Add GEMINI_API_KEY to your .env file.' });
+  }
   try {
     const {
       prompt,
@@ -1053,22 +1051,23 @@ app.delete('/api/projects/:id', (req, res) => {
   }
 });
 
-// ─── ElevenLabs Character Voice Map for The Bridge ──────────────────────────
-// Assign ElevenLabs voice IDs per canonical biblical character.
-// Set ELEVENLABS_API_KEY in .env to enable. Falls back to Gemini TTS if not set.
-const ELEVENLABS_VOICE_MAP: Record<string, string> = {
-  // The Bridge — Canonical Cast
-  David:           'pNInz6obpgDQGcFmaJgB', // Adam — warm baritone, gravitas
-  Paul:            'VR6AewLTigWG4xSOukaG', // Arnold — authoritative, deliberate
-  Peter:           'yoZ06aMxZJJ28mfd3POQ', // Sam — bold, direct
-  Moses:           'N2lVS1w4EtoT3dr4eOWO', // Callum — ancient weight
-  Mary:            'XB0fDUnXU5powFXDhCwa', // Charlotte — gentle, warm
-  Rahab:           'EXAVITQu4vr4xnSDxMaL', // Bella — resilient, grounded
-  Ruth:            'jBpfuIE2acCO8z3wKNLl', // Gigi — earnest, faithful
-  'Mary Magdalene':'oWAxZDx7w5VEj9dCyTzz', // Grace — expressive, transformed
-  // Fallback — generic character
-  default:         'EXAVITQu4vr4xnSDxMaL',
-};
+// ─── ElevenLabs host voices ─────────────────────────────────────────────────
+// Two hosts (Mesa, Reed). Voice IDs come from .env (ELEVENLABS_VOICE_MESA / ELEVENLABS_VOICE_REED),
+// picked from the live GET /v1/voices list. Nothing is hardcoded.
+function resolveVoiceId(voiceId?: string, characterName?: string): string | null {
+  if (voiceId) return voiceId;
+  const key = characterName ? `ELEVENLABS_VOICE_${characterName.toUpperCase()}` : '';
+  return (key && process.env[key]) || process.env.ELEVENLABS_VOICE_DEFAULT || null;
+}
+
+// Integration status: reports configured true/false only, never the key.
+app.get('/api/integrations/status', (_req, res) => {
+  res.json({
+    gemini: !!process.env.GEMINI_API_KEY,
+    elevenlabs: !!process.env.ELEVENLABS_API_KEY,
+    hedra: !!process.env.HEDRA_API_KEY,
+  });
+});
 
 // 7. ElevenLabs v3 TTS — Premium Character Voice Synthesis
 // POST /api/elevenlabs-speech
@@ -1089,7 +1088,7 @@ app.post('/api/elevenlabs-speech', async (req, res) => {
       characterName,
       voiceId,
       emotion,
-      modelId = 'eleven_v3',         // ElevenLabs v3 — supports emotional tags
+      modelId = process.env.ELEVENLABS_MODEL_ID || 'eleven_v3', // confirm v4 id from live API
       stability = 0.45,               // Lower = more expressive
       similarityBoost = 0.82,
       style = 0.35,
@@ -1101,16 +1100,13 @@ app.post('/api/elevenlabs-speech', async (req, res) => {
     }
 
     // Resolve voice: explicit voiceId > character name lookup > default
-    const resolvedVoiceId = voiceId
-      || (characterName && ELEVENLABS_VOICE_MAP[characterName])
-      || ELEVENLABS_VOICE_MAP.default;
-
-    // Wrap with ElevenLabs v3 emotional dialogue tag if emotion provided
-    // Format: <emotion type="calm" intensity="medium">text</emotion>
-    let processedText = text;
-    if (emotion) {
-      processedText = `<emotion type="${emotion}" intensity="medium">${text}</emotion>`;
+    const resolvedVoiceId = resolveVoiceId(voiceId, characterName);
+    if (!resolvedVoiceId) {
+      return res.status(503).json({ error: 'No ElevenLabs voice configured. Set ELEVENLABS_VOICE_MESA / ELEVENLABS_VOICE_REED in .env.' });
     }
+
+    // ElevenLabs audio tags use brackets: [warm] text
+    const processedText = emotion ? `[${emotion}] ${text}` : text;
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${resolvedVoiceId}/stream`,
@@ -1351,7 +1347,9 @@ async function startServer() {
   });
 
   // Vite middleware for development
-  if (process.env.NODE_ENV !== 'production') {
+  const isProd = process.env.NODE_ENV === 'production' || !!process.argv[1]?.endsWith('server.cjs');
+  if (!isProd) {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',

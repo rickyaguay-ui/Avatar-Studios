@@ -1,0 +1,30 @@
+{
+  "id": "pwa",
+  "label": "PWA web intro",
+  "brand": "R&B's Homesteading",
+  "durationSec": 25,
+  "cues": [
+    { "at": 0, "voiceover": "Thinking about an earthship or an off-grid homestead?", "onScreen": "Plan your off-grid home before you pour a foundation." },
+    { "at": 4, "voiceover": "R&B's Homesteading walks you through the six systems every one depends on: shelter, heat, power, water, waste, and food.", "onScreen": "Six systems. One plan. Water, power, heat, shelter, waste, and food." },
+    { "at": 12, "voiceover": "Start with the climate you'll actually live in, because these homes work best where days swing hot to cold and the air stays dry.", "onScreen": "Start with your climate" },
+    { "at": 20, "voiceover": "Install R&B's Homesteading on your phone or desktop, and keep your plan with you.", "onScreen": "Install the app" }
+  ],
+  "avatar": { "seed": "rb-homestead-pwa", "options": { "headVariant": ["medium1"], "expressionVariant": ["smileBig"], "skinColor": ["ffdbb4"], "clothingColor": ["9ddadb"] } },
+  "portraits": { "mesa": "/demo/portraits/mesa-web.png", "reed": "/demo/portraits/reed-web.png" },
+  "backdrop": "/demo/video/bg-web.png",
+  "video": "/demo/video/clip-web.mp4",
+  "voices": { "mesa": "/demo-audio/pwa-mesa.mp3", "reed": "/demo-audio/pwa-reed.mp3" },
+  "extra": {
+    "headline": "Plan your off-grid home before you pour a foundation.",
+    "subhead": "Six systems. One plan. Water, power, heat, shelter, waste, and food.",
+    "cards": [
+      { "title": "Shelter", "text": "Natural and repurposed materials; earth-sheltered walls swing less than air." },
+      { "title": "Heat", "text": "Glass wall faces the equator for winter sun; roof and north, east, west walls are heavily insulated." },
+      { "title": "Power", "text": "Solar and wind power the house." },
+      { "title": "Water", "text": "Roof water is harvested into a cistern and reused in stages." },
+      { "title": "Waste", "text": "Sewage is treated on site." },
+      { "title": "Food", "text": "Food production is built into the design." }
+    ],
+    "caveat": "Soil is about R-1 per foot; thermal mass is not insulation. Check your local rules."
+  }
+}

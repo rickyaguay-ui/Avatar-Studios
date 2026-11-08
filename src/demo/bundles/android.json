@@ -1,0 +1,19 @@
+{
+  "id": "android",
+  "label": "Android app intro",
+  "brand": "R&B's Homesteading",
+  "durationSec": 25,
+  "cues": [
+    { "at": 0, "voiceover": "", "onScreen": "R&B's Homesteading", "screen": "splash" },
+    { "at": 1, "voiceover": "This app puts your whole homestead in one view. Start with water: how full the cistern is, and how many days that lasts.", "onScreen": "Know your water | Cistern 72% | 41 days", "screen": "card1" },
+    { "at": 9, "voiceover": "Then power: what the panels made today, and what's left in the battery.", "onScreen": "Know your power | 6.2 kWh today | Battery 84%", "screen": "card2" },
+    { "at": 15, "voiceover": "Then heat: how far the greenhouse swung last night, so you know the berm is doing its job.", "onScreen": "Know your heat | Low 58F | High 74F", "screen": "card3" },
+    { "at": 22, "voiceover": "Your water, power, and heat. One app.", "onScreen": "Get started", "screen": "end" }
+  ],
+  "avatar": { "seed": "rb-homestead-android", "options": { "headVariant": ["short2"], "expressionVariant": ["calm"], "skinColor": ["d08b5b"], "clothingColor": ["ffcf77"] } },
+  "portraits": { "mesa": "/demo/portraits/mesa-android.png", "reed": "/demo/portraits/reed-android.png" },
+  "backdrop": "/demo/video/bg-android.png",
+  "video": "/demo/video/clip-android.mp4",
+  "voices": { "mesa": "/demo-audio/android-mesa.mp3", "reed": "/demo-audio/android-reed.mp3" },
+  "extra": { "note": "Synthetic demo numbers; no real data." }
+}

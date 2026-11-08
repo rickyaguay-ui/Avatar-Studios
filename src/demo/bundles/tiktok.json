@@ -1,0 +1,20 @@
+{
+  "id": "tiktok",
+  "label": "TikTok / Reels",
+  "brand": "R&B's Homesteading",
+  "durationSec": 35,
+  "cues": [
+    { "at": 0, "voiceover": "This house uses the same rainwater four times.", "onScreen": "One drop. Four jobs." },
+    { "at": 3, "voiceover": "Rain runs off the roof, through a silt catcher, into a cistern. One inch of rain gives about two-thirds of a gallon for every square foot of roof.", "onScreen": "1 in of rain = 2/3 gal per sq ft" },
+    { "at": 14, "voiceover": "Job one: it's filtered for drinking and showers.", "onScreen": "1. Drink and wash" },
+    { "at": 17, "voiceover": "Job two: sink and shower water feeds an indoor planter that grows food.", "onScreen": "2. Water the garden" },
+    { "at": 22, "voiceover": "Job three: that same water flushes the toilet.", "onScreen": "3. Flush" },
+    { "at": 26, "voiceover": "Job four: it ends in an outdoor plant cell. Flowers and shrubs, not food.", "onScreen": "4. Feed the landscape" },
+    { "at": 31, "voiceover": "Check your state's rules before you build. Follow R&B's Homesteading for more off-grid systems.", "onScreen": "Check local rules - R&B's Homesteading" }
+  ],
+  "avatar": { "seed": "rb-homestead-tiktok", "options": { "headVariant": ["bun"], "expressionVariant": ["smile"], "skinColor": ["edb98a"], "clothingColor": ["78e185"] } },
+  "portraits": { "mesa": "/demo/portraits/mesa-tiktok.png", "reed": "/demo/portraits/reed-tiktok.png" },
+  "backdrop": "/demo/video/bg-tiktok.png",
+  "video": "/demo/video/clip-tiktok.mp4",
+  "voices": { "mesa": "/demo-audio/tiktok-mesa.mp3", "reed": "/demo-audio/tiktok-reed.mp3" }
+}

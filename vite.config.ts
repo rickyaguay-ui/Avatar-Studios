@@ -3,19 +3,21 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
 
-export default defineConfig(() => {
+// `vite build --mode demo` produces the hosted Demo-mode site (dist-demo, no server, no keys).
+// Anything else is the Live-mode UI served by server.ts.
+export default defineConfig(({mode}) => {
+  const demo = mode === 'demo';
   return {
     plugins: [react(), tailwindcss()],
+    define: {__APP_MODE__: JSON.stringify(demo ? 'demo' : 'live')},
+    build: {outDir: demo ? 'dist-demo' : 'dist'},
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
     },
     server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
-      // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
     },
   };

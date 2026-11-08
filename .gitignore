@@ -9,3 +9,6 @@ coverage/
 !.env.example
 firebase-applet-config.json
 !firebase-applet-config.example.json
+projects_data.json
+dist-demo/
+.image-originals/

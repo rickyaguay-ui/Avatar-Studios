@@ -1,6 +1,6 @@
 {
-  "name": "AppIntro & Avatar Studio",
-  "description": "Create high-quality UI art, consistent avatar figures, 1K-4K backgrounds, modulated voices, and music organized in project folders with style priming pumps for web and mobile apps.",
-  "requestFramePermissions": ["microphone"],
+  "name": "Avatar Studios",
+  "description": "Make an intro for an Android app, a PWA, or a TikTok / Reels video: pick a format, shape an avatar and voice, preview the intro, and export the specs.",
+  "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
