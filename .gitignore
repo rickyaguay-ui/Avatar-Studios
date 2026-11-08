@@ -12,3 +12,4 @@ firebase-applet-config.json
 projects_data.json
 dist-demo/
 .image-originals/
+.vercel
