@@ -31,10 +31,10 @@ interface BackgroundStudioProps {
 
 const STYLE_PRESETS = [
   { id: 'cinematic', label: 'Cinematic Photoreal', suffix: ', 8k cinematic lighting, photorealistic, atmospheric depth of field, high detail' },
-  { id: 'cyberpunk', label: 'Cyberpunk Neon', suffix: ', futuristic neon glow, volumetric fog, dark cyberpunk aesthetic, high resolution' },
+  { id: 'soft_flat', label: 'Soft Flat Illustration', suffix: ', soft flat illustration, layered simple shapes, gentle gradients, calm colors, uncluttered' },
   { id: 'anime', label: 'Makoto Shinkai Anime', suffix: ', beautiful anime scenery style, lush sky clouds, painterly vibrant lighting, 4k' },
-  { id: 'vector', label: 'Modern Minimal Vector', suffix: ', clean vector art, soft isometric gradients, minimalist tech aesthetic, pristine' },
-  { id: 'fantasy', label: 'Epic Fantasy Matte', suffix: ', fantasy concept art, mystical glowing lights, intricate scenery, majestic atmosphere' },
+  { id: 'vector', label: 'Clean Minimal Vector', suffix: ', clean vector art, simple shapes, plenty of empty space, pristine' },
+  { id: 'fantasy', label: 'Storybook Landscape', suffix: ', storybook landscape illustration, painted sky, soft warm light, gentle detail' },
 ];
 
 export const BackgroundStudio: React.FC<BackgroundStudioProps> = ({
@@ -49,7 +49,7 @@ export const BackgroundStudio: React.FC<BackgroundStudioProps> = ({
   canRedo,
 }) => {
   const [activeTab, setActiveTab] = useState<'preset' | 'ai'>('preset');
-  const [prompt, setPrompt] = useState(project.backgroundPrompt || 'A futuristic glass skyscraper observatory overlooking a glowing cybernetic sunset city');
+  const [prompt, setPrompt] = useState(project.backgroundPrompt || 'Rolling green hills at sunrise with a soft orange sky');
   const [selectedStyle, setSelectedStyle] = useState('cinematic');
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

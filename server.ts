@@ -142,8 +142,8 @@ interface AppArchitectBlueprint {
     personality: string;
     gender: string;
     appearancePrompt: string;
-    hairstyle: 'cyber_buzzcut' | 'long_wavy' | 'afro_fade' | 'sleek_bob' | 'braided_locs' | 'spiky_anime' | 'side_part_slick' | 'curly_wild' | 'bald_clean';
-    clothingTop: 'executive_blazer' | 'cyber_leather_jacket' | 'techwear_hoodie' | 'nanotech_armor' | 'minimal_tshirt' | 'mystic_robe' | 'flight_bomber';
+    hairstyle: 'buzzcut' | 'long_wavy' | 'afro_fade' | 'sleek_bob' | 'braided_locs' | 'spiky_anime' | 'side_part_slick' | 'curly_wild' | 'bald_clean';
+    clothingTop: 'blazer' | 'leather_jacket' | 'hoodie' | 'knit_sweater' | 'tshirt' | 'robe' | 'bomber_jacket';
     voice: 'Kore' | 'Puck' | 'Charon' | 'Fenrir' | 'Zephyr';
     voicePitch: number; // e.g. 0.88 to 1.15
     voiceSpeed: number; // e.g. 0.90 to 1.10
@@ -240,126 +240,10 @@ Return ONLY raw JSON with NO markdown formatting around it, no \`\`\`json fences
       return res.json({ blueprint: generatedJson, source: 'gemini-3.1-pro-preview' });
     }
 
-    // Fallback blueprint generation if offline or parse issue
-    const isBridge = prompt.toLowerCase().includes('bridge') || prompt.toLowerCase().includes('spiritual') || prompt.toLowerCase().includes('christian');
-    const detectedName = appName || (isBridge ? 'The Bridge' : 'OmniCraft Studio App');
-
-    const fallbackBlueprint = {
-      id: `blueprint_${Date.now()}`,
-      appName: detectedName,
-      tagline: isBridge ? 'Spiritual Christian Sanctuary & Community Companion' : 'Next-Gen Intelligent Interactive Application',
-      targetAudience: isBridge ? 'Believers, church fellowships, seekers, and prayer groups worldwide.' : 'Modern mobile and web users seeking rich multimedia immersion.',
-      userPromptSummary: prompt,
-      aestheticTheme: isBridge ? 'Luminous Sanctuary (Warm Gold, Indigo & Pristine Slate)' : 'Modern Radiant Neo-Glass',
-      colorPalette: {
-        primary: isBridge ? '#4f46e5' : '#6366f1',
-        secondary: isBridge ? '#d97706' : '#ec4899',
-        accent: isBridge ? '#0d9488' : '#06b6d4',
-        background: '#090d16',
-        surface: '#111827',
-      },
-      styleDirectives: isBridge
-        ? 'Luminous golden hour lighting, peaceful sacred modern architecture, high-contrast readable typography, serene botanical gardens.'
-        : 'High-contrast typography, balanced dark canvas, crisp vector accents, volumetric studio lighting.',
-      avatars: [
-        {
-          id: 'av_1',
-          name: isBridge ? 'David' : 'Mentor Orion',
-          role: isBridge ? 'King, Psalmist & Shepherd' : 'Chief Guide',
-          personality: 'Courageous, poetic, and deeply human — a man after God\'s own heart',
-          gender: 'Mature male',
-          appearancePrompt: isBridge
-            ? 'Ancient Israelite king and shepherd, dark curly hair, warm olive complexion, humble yet regal bearing, painterly cinematic portrait, illustrated portrait style, earthy terracotta and ochre tones'
-            : 'Distinguished compassionate mentor with warm smiling eyes, executive tailored blazer, soft sunlit architectural background',
-          hairstyle: 'side_part_slick',
-          clothingTop: 'mystic_robe',
-          voice: 'Charon',
-          voicePitch: 0.92,
-          voiceSpeed: 0.95,
-          speechEmotion: 'calm',
-          dialogueIntro: isBridge ? 'The Lord is my shepherd — and yours. Walk with me.' : 'Welcome to the platform. Let us build your journey together.',
-          screenTarget: 'Home & Welcome Hub',
-        },
-        {
-          id: 'av_2',
-          name: isBridge ? 'Ruth' : 'Aria Nova',
-          role: isBridge ? 'Moabite Daughter-in-Law, Book of Ruth' : 'Community Leader',
-          personality: 'Faithful, tenacious, and quietly extraordinary',
-          gender: 'Young adult female',
-          appearancePrompt: isBridge
-            ? 'Ancient Near Eastern young woman, dark hair, warm bronze complexion, humble determined expression, painterly cinematic portrait, illustrated portrait style, earthy warm tones'
-            : 'Youthful smiling female guide, curly hair, warm natural sunlight, modern studio background',
-          hairstyle: 'long_wavy',
-          clothingTop: 'mystic_robe',
-          voice: 'Kore',
-          voicePitch: 1.05,
-          voiceSpeed: 0.98,
-          speechEmotion: 'calm',
-          dialogueIntro: isBridge ? 'Where you go, I will go. You are not walking this path alone.' : 'Hello! Ready to dive into today\'s exciting challenges?',
-          screenTarget: 'Community & Group Chat',
-        },
-      ],
-      scenes: [
-        {
-          id: 'sc_1',
-          name: isBridge ? 'Sanctuary Dawn' : 'Nexus Main Hub',
-          screenName: 'Welcome Dashboard',
-          description: 'Luminous architectural sanctuary with golden sunbeams filtering through glass.',
-          prompt: 'Architectural modern cathedral at sunrise, golden rays, clean slate floor, serene lighting',
-          aspectRatio: '16:9',
-          stylePreset: 'cinematic',
-        },
-      ],
-      uiAssets: [
-        {
-          id: 'ui_1',
-          name: isBridge ? 'Celtic Bridge Cross Emblem' : 'Core System Emblem',
-          category: 'logo',
-          uiType: 'icon_glyph',
-          prompt: 'Minimalist elegant modern cross emblem with intertwined bridge motif, golden gradient on navy circular badge',
-          usageDescription: 'Primary App Icon and Splash Screen Brand Mark',
-        },
-      ],
-      checklist: [
-        {
-          id: 'chk_1',
-          category: 'architecture',
-          title: 'Establish Design System & Avatar Voice Mapping',
-          detail: 'Assign Gemini TTS models to characters and generate style tokens.',
-          completed: true,
-          actionTarget: 'avatar',
-        },
-        {
-          id: 'chk_2',
-          category: 'github',
-          title: 'Generate CLAUDE.md & Repository Push Script',
-          detail: 'Provide ready-to-use Claude Code instructions and setup script.',
-          completed: true,
-          actionTarget: 'export',
-        },
-      ],
-      edgeCases: [
-        {
-          id: 'edge_1',
-          title: 'Low Audio Bandwidth & Offline Latency',
-          severity: 'critical',
-          impact: 'Mobile users on remote retreats or unstable wifi experience TTS delays.',
-          mitigation: 'Pre-cache synthesized speech blobs in IndexedDB and provide Web Speech API fallback.',
-          codePattern: 'const cached = await idbKeyval.get(voiceKey); if (cached) return cached;',
-        },
-      ],
-      gitHubPlan: {
-        repositoryName: `${detectedName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-app`,
-        recommendedStructure: `${detectedName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-app/\n├── CLAUDE.md\n├── /src\n│   ├── /components\n│   ├── /data\n│   └── /assets`,
-        dependencies: ['react@^18.3.1', 'lucide-react@^1.16.0', 'tailwindcss@^4.0.0'],
-        claudeMdContent: `# ${detectedName}\n\nArchitecture and implementation guide for Claude Code.`,
-        bashSetupScript: `git init\ngit add .\ngit commit -m "feat: initial commit for ${detectedName}"`,
-        packageJsonSnippet: '{\n  "name": "' + detectedName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '"\n}',
-      },
-      createdAt: Date.now(),
-    };
-
-    res.json({ blueprint: fallbackBlueprint, source: 'fallback_template' });
+    // No canned blueprint: if Gemini did not return a usable plan, say so.
+    return res.status(502).json({
+      error: 'The AI did not return a usable plan. Check GEMINI_API_KEY and try again.',
+    });
   } catch (error: any) {
     console.error('App Architect API Error:', error);
     res.status(500).json({ error: error?.message || 'Failed to generate blueprint' });
@@ -379,6 +263,15 @@ async function parseImageToPart(imageUrl: string): Promise<{ inlineData: { mimeT
             data: match[2],
           },
         };
+      }
+    } else if (imageUrl.startsWith('/') && !imageUrl.startsWith('//')) {
+      // Bundled asset served from /public (e.g. /avatars/sketch_hana.png)
+      const publicDir = path.resolve(process.cwd(), 'public');
+      const filePath = path.resolve(publicDir, '.' + imageUrl.split('?')[0]);
+      const ext = path.extname(filePath).toLowerCase();
+      const mime = ext === '.png' ? 'image/png' : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : ext === '.webp' ? 'image/webp' : null;
+      if (mime && filePath.startsWith(publicDir + path.sep) && fs.existsSync(filePath)) {
+        return { inlineData: { mimeType: mime, data: fs.readFileSync(filePath).toString('base64') } };
       }
     } else if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       const fetched = await fetch(imageUrl, {
@@ -586,7 +479,7 @@ app.post('/api/transcribe-audio', async (req, res) => {
 app.post('/api/generate-video', async (req, res) => {
   try {
     const {
-      prompt = 'Cinematic camera pan across high-tech futuristic city',
+      prompt = 'Slow cinematic camera pan across a quiet green valley at sunrise',
       imageUrl,
       aspectRatio = '16:9',
       resolution = '720p',
@@ -742,9 +635,9 @@ function synthesizeProceduralSoundtrackWav(prompt: string, durationSec = 10): Bu
   const lowerPrompt = prompt.toLowerCase();
   const isUpbeat = /upbeat|arcade|chiptune|retro|fast|dance|game|playful/i.test(lowerPrompt);
   const isLofi = /lo-fi|lofi|chill|relax|calm|peaceful|soft|cozy/i.test(lowerPrompt);
-  const isCyber = /cyber|synth|neon|future|futuristic|techno|dark|sci-fi/i.test(lowerPrompt);
+  const isElectronic = /synth|electronic|techno|dark|driving|pulse/i.test(lowerPrompt);
 
-  const bpm = isUpbeat ? 128 : isLofi ? 82 : isCyber ? 116 : 100;
+  const bpm = isUpbeat ? 128 : isLofi ? 82 : isElectronic ? 116 : 100;
   const beatSec = 60 / bpm;
   const barSec = beatSec * 4;
 
@@ -755,7 +648,7 @@ function synthesizeProceduralSoundtrackWav(prompt: string, durationSec = 10): Bu
         [261.63, 329.63, 392.0, 493.88], // Cmaj7
         [196.0, 246.94, 293.66, 349.23], // G7
       ]
-    : isCyber
+    : isElectronic
     ? [
         [110.0, 130.81, 164.81, 220.0], // Am
         [98.0, 123.47, 146.83, 196.0], // G
@@ -903,7 +796,7 @@ app.post('/api/generate-speech', async (req, res) => {
 // 6. Music Generation with Lyria (lyria-3-clip-preview & lyria-3-pro-preview) with adaptive fallback
 app.post('/api/generate-music', async (req, res) => {
   const {
-    prompt = 'Upbeat futuristic synth soundtrack for mobile app intro',
+    prompt = 'Warm upbeat background music for a mobile app intro',
     modelType = 'clip', // 'clip' (up to 30s) or 'pro' (full tracks)
     imageUrl,
   } = req.body;
@@ -1003,7 +896,11 @@ let projectsMemoryStore: any[] = [];
 
 try {
   if (fs.existsSync(PROJECTS_FILE)) {
-    projectsMemoryStore = JSON.parse(fs.readFileSync(PROJECTS_FILE, 'utf-8'));
+    // Drop the old pre-built demo projects if an earlier version saved them to disk.
+    const LEGACY_DEMO_IDS = new Set(['proj_cyberpunk_nexus', 'proj_aura_meditation', 'proj_saas_metrics']);
+    projectsMemoryStore = JSON.parse(fs.readFileSync(PROJECTS_FILE, 'utf-8')).filter(
+      (p: any) => !LEGACY_DEMO_IDS.has(p?.id)
+    );
   }
 } catch (e) {
   projectsMemoryStore = [];
@@ -1053,21 +950,19 @@ app.delete('/api/projects/:id', (req, res) => {
   }
 });
 
-// ─── ElevenLabs Character Voice Map for The Bridge ──────────────────────────
-// Assign ElevenLabs voice IDs per canonical biblical character.
-// Set ELEVENLABS_API_KEY in .env to enable. Falls back to Gemini TTS if not set.
+// ─── ElevenLabs Voice Map ───────────────────────────────────────────────────
+// ElevenLabs stock voice IDs by name. Set ELEVENLABS_API_KEY in .env to enable.
+// Falls back to Gemini TTS if not set.
 const ELEVENLABS_VOICE_MAP: Record<string, string> = {
-  // The Bridge — Canonical Cast
-  David:           'pNInz6obpgDQGcFmaJgB', // Adam — warm baritone, gravitas
-  Paul:            'VR6AewLTigWG4xSOukaG', // Arnold — authoritative, deliberate
-  Peter:           'yoZ06aMxZJJ28mfd3POQ', // Sam — bold, direct
-  Moses:           'N2lVS1w4EtoT3dr4eOWO', // Callum — ancient weight
-  Mary:            'XB0fDUnXU5powFXDhCwa', // Charlotte — gentle, warm
-  Rahab:           'EXAVITQu4vr4xnSDxMaL', // Bella — resilient, grounded
-  Ruth:            'jBpfuIE2acCO8z3wKNLl', // Gigi — earnest, faithful
-  'Mary Magdalene':'oWAxZDx7w5VEj9dCyTzz', // Grace — expressive, transformed
-  // Fallback — generic character
-  default:         'EXAVITQu4vr4xnSDxMaL',
+  Adam:      'pNInz6obpgDQGcFmaJgB', // warm baritone
+  Arnold:    'VR6AewLTigWG4xSOukaG', // authoritative, deliberate
+  Sam:       'yoZ06aMxZJJ28mfd3POQ', // bold, direct
+  Callum:    'N2lVS1w4EtoT3dr4eOWO', // deep, weighty
+  Charlotte: 'XB0fDUnXU5powFXDhCwa', // gentle, warm
+  Bella:     'EXAVITQu4vr4xnSDxMaL', // grounded, steady
+  Gigi:      'jBpfuIE2acCO8z3wKNLl', // earnest, youthful
+  Grace:     'oWAxZDx7w5VEj9dCyTzz', // expressive, friendly
+  default:   'EXAVITQu4vr4xnSDxMaL',
 };
 
 // 7. ElevenLabs v3 TTS — Premium Character Voice Synthesis

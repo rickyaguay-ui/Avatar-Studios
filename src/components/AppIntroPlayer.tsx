@@ -389,13 +389,13 @@ export const AppIntroPlayer: React.FC<AppIntroPlayerProps> = ({
                 </div>
               ) : (
                 <>
-                  <img
-                    src={project.backgroundUrl}
+                  {project.backgroundUrl ? (<img
+                    src={project.backgroundUrl || undefined}
                     alt="App background"
                     referrerPolicy="no-referrer"
                     style={getBackgroundAnimStyle()}
                     className="absolute inset-0 w-full h-full object-cover select-none transition-transform duration-700"
-                  />
+                  />) : null}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/40" />
                 </>
               )}
@@ -418,12 +418,12 @@ export const AppIntroPlayer: React.FC<AppIntroPlayerProps> = ({
                     isPlaying ? 'scale-105 animate-bounce-subtle' : ''
                   }`}
                 >
-                  <img
-                    src={project.avatarUrl}
+                  {project.avatarUrl ? (<img
+                    src={project.avatarUrl || undefined}
                     alt="App avatar mascot"
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.8)]"
-                  />
+                  />) : null}
                   {isPlaying && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-indigo-500/90 text-white text-[9px] font-semibold flex items-center gap-1 shadow-lg backdrop-blur-sm animate-pulse">
                       <Volume2 className="w-2.5 h-2.5" />
@@ -478,13 +478,13 @@ export const AppIntroPlayer: React.FC<AppIntroPlayerProps> = ({
                 </div>
               ) : (
                 <>
-                  <img
-                    src={project.backgroundUrl}
+                  {project.backgroundUrl ? (<img
+                    src={project.backgroundUrl || undefined}
                     alt="App background"
                     referrerPolicy="no-referrer"
                     style={getBackgroundAnimStyle()}
                     className="absolute inset-0 w-full h-full object-cover select-none opacity-40"
-                  />
+                  />) : null}
                   <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" />
                 </>
               )}
@@ -520,14 +520,14 @@ export const AppIntroPlayer: React.FC<AppIntroPlayerProps> = ({
 
               {/* Right Column: Avatar Figure */}
               <div className="relative z-10 w-64 h-72 flex items-end justify-center">
-                <img
-                  src={project.avatarUrl}
+                {project.avatarUrl ? (<img
+                  src={project.avatarUrl || undefined}
                   alt="Avatar figure"
                   referrerPolicy="no-referrer"
                   className={`w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] ${
                     isPlaying ? 'scale-105 transition-transform' : ''
                   }`}
-                />
+                />) : null}
               </div>
             </div>
           </div>
@@ -543,13 +543,13 @@ export const AppIntroPlayer: React.FC<AppIntroPlayerProps> = ({
               </div>
             ) : (
               <>
-                <img
-                  src={project.backgroundUrl}
+                {project.backgroundUrl ? (<img
+                  src={project.backgroundUrl || undefined}
                   alt="Cutscene scene"
                   referrerPolicy="no-referrer"
                   style={getBackgroundAnimStyle()}
                   className="absolute inset-0 w-full h-full object-cover select-none"
-                />
+                />) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
               </>
             )}
@@ -565,14 +565,14 @@ export const AppIntroPlayer: React.FC<AppIntroPlayerProps> = ({
             {/* Cutscene Avatar Character Sprite */}
             <div className={`relative z-10 w-full flex-1 flex ${getAvatarPositionClasses()}`}>
               <div className="h-64 sm:h-72">
-                <img
-                  src={project.avatarUrl}
+                {project.avatarUrl ? (<img
+                  src={project.avatarUrl || undefined}
                   alt="Character sprite"
                   referrerPolicy="no-referrer"
                   className={`w-full h-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.9)] ${
                     isPlaying ? 'animate-bounce-subtle' : ''
                   }`}
-                />
+                />) : null}
               </div>
             </div>
 
@@ -605,24 +605,24 @@ export const AppIntroPlayer: React.FC<AppIntroPlayerProps> = ({
               </div>
             ) : (
               <>
-                <img
-                  src={project.backgroundUrl}
+                {project.backgroundUrl ? (<img
+                  src={project.backgroundUrl || undefined}
                   alt="Full background"
                   referrerPolicy="no-referrer"
                   style={getBackgroundAnimStyle()}
                   className="absolute inset-0 w-full h-full object-cover select-none"
-                />
+                />) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent" />
               </>
             )}
 
             <div className={`relative z-10 w-full flex ${getAvatarPositionClasses()}`}>
-              <img
-                src={project.avatarUrl}
+              {project.avatarUrl ? (<img
+                src={project.avatarUrl || undefined}
                 alt="Avatar"
                 referrerPolicy="no-referrer"
                 className="max-h-[380px] object-contain drop-shadow-2xl"
-              />
+              />) : null}
             </div>
 
             {project.showSubtitles && (

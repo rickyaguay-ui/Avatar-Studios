@@ -9,6 +9,7 @@ import {
   signInWithGoogle,
   signOutUser,
   onAuthStateChanged,
+  firebaseEnabled,
 } from './firebase.ts';
 import type { User } from './firebase.ts';
 import { ProjectFolder } from '../types.ts';
@@ -17,6 +18,7 @@ import { ProjectFolder } from '../types.ts';
  * Loads all projects saved in user's Firestore cloud database.
  */
 export async function loadUserProjectsFromFirestore(userId: string): Promise<ProjectFolder[]> {
+  if (!firebaseEnabled) return [];
   try {
     const projectsCol = collection(db, 'users', userId, 'projects');
     const snapshot = await getDocs(projectsCol);
@@ -36,6 +38,7 @@ export async function loadUserProjectsFromFirestore(userId: string): Promise<Pro
  * Saves or updates a project document in user's Firestore cloud database.
  */
 export async function saveProjectToFirestore(userId: string, project: ProjectFolder): Promise<void> {
+  if (!firebaseEnabled) return;
   try {
     const projectRef = doc(db, 'users', userId, 'projects', project.id);
     await setDoc(projectRef, project, { merge: true });
@@ -48,6 +51,7 @@ export async function saveProjectToFirestore(userId: string, project: ProjectFol
  * Deletes a project from user's Firestore cloud database.
  */
 export async function deleteProjectFromFirestore(userId: string, projectId: string): Promise<void> {
+  if (!firebaseEnabled) return;
   try {
     const projectRef = doc(db, 'users', userId, 'projects', projectId);
     await deleteDoc(projectRef);
@@ -57,4 +61,4 @@ export async function deleteProjectFromFirestore(userId: string, projectId: stri
 }
 
 export type { User };
-export { auth, signInWithGoogle, signOutUser, onAuthStateChanged };
+export { auth, signInWithGoogle, signOutUser, onAuthStateChanged, firebaseEnabled };

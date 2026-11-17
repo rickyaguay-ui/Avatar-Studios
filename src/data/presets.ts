@@ -1,118 +1,177 @@
 import { PredefinedScene, AvatarPreset, MusicTrack } from '../types.ts';
 
+// Backgrounds are bundled in /public/backgrounds (drawn for this project, no outside license).
 export const PREDEFINED_SCENES: PredefinedScene[] = [
   {
-    id: 'cyberpunk_city',
-    title: 'Neon Megacity Skyline',
-    category: 'Cyberpunk',
-    imageUrl: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=1600&q=85',
-    suggestedMusic: 'synthwave_pulse',
-    suggestedTone: 'Cyberpunk Futuristic',
-    description: 'Towering holographic skyscrapers bathed in violet and cyan rain, ideal for tech or gaming apps.'
-  },
-  {
-    id: 'deep_space',
-    title: 'Celestial Deep Orbit',
-    category: 'Cosmic',
-    imageUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1600&q=85',
-    suggestedMusic: 'ambient_space',
+    id: 'sunrise_hills',
+    title: 'Sunrise Hills',
+    category: 'Nature',
+    imageUrl: '/backgrounds/sunrise_hills.png',
+    suggestedMusic: 'soft_ambient',
     suggestedTone: 'Calm & Warm',
-    description: 'Ethereal nebula stars and planetary horizons for futuristic onboarding or sci-fi dashboards.'
+    description: 'Warm orange sky over layered rolling hills. A gentle, hopeful start screen.'
   },
   {
-    id: 'modern_minimal_office',
-    title: 'Prism Glass Workspace',
-    category: 'Modern Tech',
-    imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=85',
-    suggestedMusic: 'corporate_upbeat',
-    suggestedTone: 'Cheerful',
-    description: 'Ultra-clean architectural glass office with natural golden daylight, perfect for SaaS products.'
-  },
-  {
-    id: 'fantasy_forest',
-    title: 'Enchanted Lumina Glade',
-    category: 'Fantasy',
-    imageUrl: 'https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=1600&q=85',
-    suggestedMusic: 'epic_orchestral',
-    suggestedTone: 'Heroic & Confident',
-    description: 'Glowing bio-luminescent flora, ancient mossy stones, and fairy mist for RPGs and creative apps.'
-  },
-  {
-    id: 'retro_arcade_grid',
-    title: 'Retro Neon Wave Grid',
-    category: 'Retro Gaming',
-    imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=85',
-    suggestedMusic: 'chiptune_arcade',
-    suggestedTone: 'Playful',
-    description: 'Outrun 80s wireframe grid with digital mountains and synthetic sun for indie games.'
-  },
-  {
-    id: 'sunset_studio',
-    title: 'Minimalist Sunset Gradient',
-    category: 'Minimalist',
-    imageUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1600&q=85',
+    id: 'calm_lake',
+    title: 'Calm Lake',
+    category: 'Calm',
+    imageUrl: '/backgrounds/calm_lake.png',
     suggestedMusic: 'lofi_chill',
     suggestedTone: 'Calm & Warm',
-    description: 'Smooth duotone pastel gradient backdrop that keeps full focus on your avatar and UI.'
+    description: 'Still blue water with soft distant mountains. Quiet and easy on the eyes.'
+  },
+  {
+    id: 'pine_forest',
+    title: 'Pine Forest',
+    category: 'Nature',
+    imageUrl: '/backgrounds/pine_forest.png',
+    suggestedMusic: 'soft_ambient',
+    suggestedTone: 'Calm & Warm',
+    description: 'Layered green hills fading into light. Good for wellness, outdoors and learning apps.'
+  },
+  {
+    id: 'soft_paper',
+    title: 'Soft Paper',
+    category: 'Minimal',
+    imageUrl: '/backgrounds/soft_paper.png',
+    suggestedMusic: 'corporate_upbeat',
+    suggestedTone: 'Cheerful',
+    description: 'Plain cream backdrop with faint shapes. Keeps all focus on your avatar and UI.'
+  },
+  {
+    id: 'evening_sky',
+    title: 'Evening Sky',
+    category: 'Calm',
+    imageUrl: '/backgrounds/evening_sky.png',
+    suggestedMusic: 'lofi_chill',
+    suggestedTone: 'Calm & Warm',
+    description: 'Purple to orange dusk with soft clouds. Works for night-time and reflection screens.'
+  },
+  {
+    id: 'open_plain',
+    title: 'Open Plain',
+    category: 'Nature',
+    imageUrl: '/backgrounds/open_plain.png',
+    suggestedMusic: 'epic_orchestral',
+    suggestedTone: 'Heroic & Confident',
+    description: 'Wide golden field under a clear sky. Open and simple.'
   }
 ];
 
+// Demo avatars are bundled in /public/avatars. All five art sets are CC0 (public domain):
+// Open Peeps (Pablo Stanley), Lorelei (Lisa Wischofsky), Notionists (Zoish), Pixel Art, Thumbs (DiceBear).
+// See public/avatars/LICENSES.md. `tag` is the art style shown in the gallery.
 export const PREDEFINED_AVATARS: AvatarPreset[] = [
   {
-    id: 'nova_ai',
-    name: 'Nova 7',
-    role: 'AI Companion & Guide',
-    imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=85',
+    id: 'sketch_hana',
+    name: 'Hana',
+    role: 'Welcome Guide',
+    imageUrl: '/avatars/sketch_hana.png',
     voice: 'Kore',
-    defaultDialogue: 'Welcome aboard! I am Nova, your intelligent co-pilot. All systems are initialized and ready for your first mission.',
-    tag: '3D Hologram'
+    defaultDialogue: "Hi, I'm Hana. I'll show you around so you can get started in a minute or two.",
+    tag: 'Hand-Drawn Sketch',
+    styleId: 'sketch'
   },
   {
-    id: 'kai_hacker',
-    name: 'Kai Vesper',
-    role: 'Cyberpunk Operative',
-    imageUrl: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=800&q=85',
+    id: 'sketch_kai',
+    name: 'Kai',
+    role: 'Study Coach',
+    imageUrl: '/avatars/sketch_kai.png',
     voice: 'Fenrir',
-    defaultDialogue: 'Grid connection established. Security firewalls breached. You have unrestricted root access now.',
-    tag: 'Sci-Fi'
+    defaultDialogue: "Let's pick one small goal for today. We'll build from there.",
+    tag: 'Hand-Drawn Sketch',
+    styleId: 'sketch'
   },
   {
-    id: 'elena_pro',
-    name: 'Elena Cross',
-    role: 'Strategic Onboarding Lead',
-    imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=85',
-    voice: 'Zephyr',
-    defaultDialogue: 'Great to meet you! Let me walk you through your personalized analytics dashboard and key milestones.',
-    tag: 'Executive'
-  },
-  {
-    id: 'spark_bot',
-    name: 'Sparky',
-    role: 'Playful Mascot Bot',
-    imageUrl: 'https://images.unsplash.com/photo-1614680376593-902f749f7ffc?auto=format&fit=crop&w=800&q=85',
+    id: 'portrait_eli',
+    name: 'Eli',
+    role: 'Community Host',
+    imageUrl: '/avatars/portrait_eli.png',
     voice: 'Puck',
-    defaultDialogue: 'BEEP BOOP! High five! You just leveled up your daily streak! Ready for the next adventure?',
-    tag: 'Gaming'
+    defaultDialogue: "Welcome! Say hello to the group, and ask anything you like.",
+    tag: 'Flat Portrait',
+    styleId: 'flat_portrait'
   },
   {
-    id: 'aegis_sentinel',
-    name: 'Commander Aegis',
-    role: 'Defense Protocol Sentinel',
-    imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85',
+    id: 'portrait_ivan',
+    name: 'Ivan',
+    role: 'Reading Buddy',
+    imageUrl: '/avatars/portrait_ivan.png',
+    voice: 'Zephyr',
+    defaultDialogue: "Ready when you are. Take your time, and we'll read this together.",
+    tag: 'Flat Portrait',
+    styleId: 'flat_portrait'
+  },
+  {
+    id: 'line_eli',
+    name: 'Elena',
+    role: 'Product Tour Guide',
+    imageUrl: '/avatars/line_eli.png',
+    voice: 'Zephyr',
+    defaultDialogue: "Here's your dashboard. The three things you'll use most are right at the top.",
+    tag: 'Line Art',
+    styleId: 'line_art'
+  },
+  {
+    id: 'line_ivan',
+    name: 'Ian',
+    role: 'Support Helper',
+    imageUrl: '/avatars/line_ivan.png',
     voice: 'Charon',
-    defaultDialogue: 'Perimeter secure. All encryption protocols verified. Proceed with standard operational deployment.',
-    tag: 'Heroic'
+    defaultDialogue: "If you get stuck, tap the help button and I'll walk you through it.",
+    tag: 'Line Art',
+    styleId: 'line_art'
+  },
+  {
+    id: 'pixel_cora',
+    name: 'Cora',
+    role: 'Game Guide',
+    imageUrl: '/avatars/pixel_cora.png',
+    voice: 'Puck',
+    defaultDialogue: "Level one is ready. Grab your first badge and I'll show you the next step.",
+    tag: 'Pixel Art',
+    styleId: 'pixel'
+  },
+  {
+    id: 'pixel_hana',
+    name: 'Rowan',
+    role: 'Quiz Host',
+    imageUrl: '/avatars/pixel_hana.png',
+    voice: 'Fenrir',
+    defaultDialogue: "Three questions, no pressure. Pick the answer that feels right.",
+    tag: 'Pixel Art',
+    styleId: 'pixel'
+  },
+  {
+    id: 'mascot_ava',
+    name: 'Mochi',
+    role: 'Friendly Mascot',
+    imageUrl: '/avatars/mascot_ava.png',
+    voice: 'Puck',
+    defaultDialogue: "Yay, you're here! Let's go see what's new today.",
+    tag: 'Friendly Mascot',
+    styleId: 'mascot'
+  },
+  {
+    id: 'mascot_fay',
+    name: 'Pip',
+    role: 'Daily Reminder Buddy',
+    imageUrl: '/avatars/mascot_fay.png',
+    voice: 'Kore',
+    defaultDialogue: "Quick check-in time. How are you feeling today?",
+    tag: 'Friendly Mascot',
+    styleId: 'mascot'
   }
 ];
 
 export const MUSIC_TRACKS: MusicTrack[] = [
   {
-    id: 'synthwave_pulse',
-    name: 'Neon Horizon',
+    id: 'electronic_pulse',
+    name: 'Steady Pulse',
     bpm: 110,
     mood: 'Energetic & Driving',
-    genre: 'synthwave',
-    description: 'Analog sawtooth basslines with shimmering arpeggiated retro synths.'
+    genre: 'electronic',
+    description: 'Warm synth bass with a steady, shimmering arpeggio.'
   },
   {
     id: 'lofi_chill',
@@ -123,15 +182,15 @@ export const MUSIC_TRACKS: MusicTrack[] = [
     description: 'Warm vinyl warmth, mellow Rhodes chords, and laid-back beat.'
   },
   {
-    id: 'ambient_space',
-    name: 'Zero Gravity',
+    id: 'soft_ambient',
+    name: 'Soft Air',
     bpm: 65,
-    mood: 'Ethereal & Atmospheric',
+    mood: 'Calm & Open',
     genre: 'ambient',
-    description: 'Floating reverb pads with subtle sub-bass harmonic resonance.'
+    description: 'Slow floating pads with a quiet low hum underneath.'
   },
   {
-    id: 'chiptune_arcade',
+    id: 'chiptune_8bit',
     name: 'Pixel Quest 8-Bit',
     bpm: 130,
     mood: 'Playful & Bouncy',
@@ -140,7 +199,7 @@ export const MUSIC_TRACKS: MusicTrack[] = [
   },
   {
     id: 'corporate_upbeat',
-    name: 'Future Momentum',
+    name: 'Bright Start',
     bpm: 118,
     mood: 'Optimistic & Clean',
     genre: 'corporate',
@@ -148,7 +207,7 @@ export const MUSIC_TRACKS: MusicTrack[] = [
   },
   {
     id: 'epic_orchestral',
-    name: 'Titans Rise',
+    name: 'Rising Strings',
     bpm: 96,
     mood: 'Cinematic & Heroic',
     genre: 'epic',

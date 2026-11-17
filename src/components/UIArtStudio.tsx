@@ -55,7 +55,7 @@ const UI_ART_PRESETS: UIArtPreset[] = [
     aspectRatio: '16:9',
     icon: <Layout className="w-4 h-4" />,
     description: 'Cinematic wide banner for landing pages, App Store features, or onboarding headers.',
-    defaultPrompt: 'Cinematic widescreen hero splash banner showcasing futuristic interface elements floating over an ambient depth backdrop',
+    defaultPrompt: 'Cinematic widescreen hero splash banner with a friendly character and clean app screens over a soft backdrop',
   },
   {
     id: 'card_graphic',
@@ -94,13 +94,13 @@ export function UIArtStudio({
   const [sourceImageUrl, setSourceImageUrl] = useState<string>('');
   const [selectedType, setSelectedType] = useState<UIArtType>('app_icon');
   const [customPrompt, setCustomPrompt] = useState(UI_ART_PRESETS[0].defaultPrompt);
-  const [editInstruction, setEditInstruction] = useState('Add glowing neon circuit lines and golden trim');
+  const [editInstruction, setEditInstruction] = useState('Add a thin gold border and round the corners');
   const [resolution, setResolution] = useState<ImageSize>('1K');
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('1:1');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [assetName, setAssetName] = useState('Nexus App Icon');
+  const [assetName, setAssetName] = useState('My App Icon');
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
@@ -387,7 +387,7 @@ export function UIArtStudio({
             placeholder={
               mode === 'create'
                 ? 'Describe the UI element, symbols, materials, bevels, lighting...'
-                : 'Describe what to edit (e.g., "Add neon circuit borders and gold highlights", "Change style to cyberpunk neon")'
+                : 'Describe what to edit (e.g., "Add a gold border", "Make the colors warmer")'
             }
             className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
           />
@@ -448,7 +448,7 @@ export function UIArtStudio({
               value={assetName}
               onChange={(e) => setAssetName(e.target.value)}
               className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-              placeholder="e.g. Nexus Launcher Icon"
+              placeholder="e.g. My Launcher Icon"
             />
           </div>
         </div>

@@ -43,21 +43,20 @@ const VOICES = [
   { id: 'Kore', name: 'Kore', desc: 'Warm, clear, and inspiring (Best for guide/assistant)', provider: 'gemini' },
   { id: 'Puck', name: 'Puck', desc: 'Energetic, cheerful, and friendly (Great for game mascots)', provider: 'gemini' },
   { id: 'Charon', name: 'Charon', desc: 'Deep, resonant, and authoritative (Commanders, narrators)', provider: 'gemini' },
-  { id: 'Fenrir', name: 'Fenrir', desc: 'Bold, gritty, and dramatic (Cyberpunk/action characters)', provider: 'gemini' },
-  { id: 'Zephyr', name: 'Zephyr', desc: 'Calm, smooth, and tech-forward (Product intros)', provider: 'gemini' },
+  { id: 'Fenrir', name: 'Fenrir', desc: 'Bold and dramatic (action characters, narrators)', provider: 'gemini' },
+  { id: 'Zephyr', name: 'Zephyr', desc: 'Calm and smooth (product intros)', provider: 'gemini' },
 ] as const;
 
-// ElevenLabs character voices pre-assigned to The Bridge canonical cast.
-// Only shown when voiceProvider === 'elevenlabs'. Require ELEVENLABS_API_KEY in .env.
-const ELEVENLABS_BRIDGE_VOICES = [
-  { id: 'pNInz6obpgDQGcFmaJgB', name: 'David', character: 'David', desc: 'Warm baritone — gravitas and depth', emoji: '👑' },
-  { id: 'VR6AewLTigWG4xSOukaG', name: 'Paul',  character: 'Paul',  desc: 'Authoritative, deliberate, rhetorical', emoji: '✍️' },
-  { id: 'yoZ06aMxZJJ28mfd3POQ', name: 'Peter', character: 'Peter', desc: 'Bold, direct, unpolished sincerity', emoji: '⚓' },
-  { id: 'N2lVS1w4EtoT3dr4eOWO', name: 'Moses', character: 'Moses', desc: 'Ancient weight, commanding presence', emoji: '🪨' },
-  { id: 'XB0fDUnXU5powFXDhCwa', name: 'Mary',  character: 'Mary',  desc: 'Gentle, warm, quietly extraordinary', emoji: '🌹' },
-  { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Rahab', character: 'Rahab', desc: 'Resilient, grounded, transformed', emoji: '🔴' },
-  { id: 'jBpfuIE2acCO8z3wKNLl', name: 'Ruth',  character: 'Ruth',  desc: 'Earnest, faithful, quietly tenacious', emoji: '🌾' },
-  { id: 'oWAxZDx7w5VEj9dCyTzz', name: 'Mary Magdalene', character: 'Mary Magdalene', desc: 'Expressive, transformed, devoted', emoji: '💜' },
+// ElevenLabs stock voices. Only shown when voiceProvider === 'elevenlabs'. Needs ELEVENLABS_API_KEY in .env.
+const ELEVENLABS_VOICES = [
+  { id: 'pNInz6obpgDQGcFmaJgB', name: 'Adam', character: 'Adam', desc: 'Warm baritone, steady and deep', emoji: '🎙️' },
+  { id: 'VR6AewLTigWG4xSOukaG', name: 'Arnold', character: 'Arnold', desc: 'Authoritative and deliberate', emoji: '🎙️' },
+  { id: 'yoZ06aMxZJJ28mfd3POQ', name: 'Sam', character: 'Sam', desc: 'Bold and direct', emoji: '🎙️' },
+  { id: 'N2lVS1w4EtoT3dr4eOWO', name: 'Callum', character: 'Callum', desc: 'Deep, weighty and calm', emoji: '🎙️' },
+  { id: 'XB0fDUnXU5powFXDhCwa', name: 'Charlotte', character: 'Charlotte', desc: 'Gentle and warm', emoji: '🎙️' },
+  { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Bella', character: 'Bella', desc: 'Grounded and steady', emoji: '🎙️' },
+  { id: 'jBpfuIE2acCO8z3wKNLl', name: 'Gigi', character: 'Gigi', desc: 'Earnest and youthful', emoji: '🎙️' },
+  { id: 'oWAxZDx7w5VEj9dCyTzz', name: 'Grace', character: 'Grace', desc: 'Expressive and friendly', emoji: '🎙️' },
 ];
 
 const EMOTIONS = [
@@ -68,17 +67,15 @@ const EMOTIONS = [
   { id: 'calm', label: 'Calm & Soothing', emoji: '🍃' },
   { id: 'sad', label: 'Somber & Emotional', emoji: '💧' },
   { id: 'dramatic', label: 'Dramatic & Intense', emoji: '🔥' },
-  { id: 'robotic', label: 'Cybernetic AI', emoji: '🤖' },
+  { id: 'robotic', label: 'Robot Voice', emoji: '🤖' },
 ] as const;
 
 const SCRIPT_TEMPLATES = [
-  { label: 'SaaS App Onboarding', text: 'Welcome to your workspace! Let us review your key metrics and automate your workflow in seconds.' },
-  { label: 'Game Intro Cutscene', text: 'Warning: Dimensional anomaly detected. Prepare your arsenal, champion. The invasion begins now!' },
-  { label: 'Fintech / Security Alert', text: 'Identity verified. Secure biometric encryption active. Your digital vault is now unlocked.' },
-  { label: 'Fitness / Habit Coach', text: 'Outstanding work today! You just unlocked a 7-day streak. Keep this momentum burning!' },
-  { label: 'The Bridge — David', text: 'The Lord is my shepherd — and yours. Even in the valley, His rod and staff are with you. Walk with me.' },
-  { label: 'The Bridge — Ruth', text: 'Where you go, I will go. Where you lodge, I will lodge. You are never walking this path alone.' },
-  { label: 'The Bridge — Paul', text: 'I have learned, in whatever state I am, to be content. Not by my own strength — but through Christ who strengthens me.' },
+  { label: 'App Welcome', text: "Welcome! Let's take a quick look around, and then you can get started." },
+  { label: 'Daily Check-in', text: "Good morning! Ready for today's one small goal? We'll take it step by step." },
+  { label: 'Fitness / Habit Coach', text: 'Great work today! You just hit a 7-day streak. Keep it going.' },
+  { label: 'Calm / Wellness', text: 'Take a deep breath. You can go at your own pace. There is no rush.' },
+  { label: 'Story Narration', text: 'Long ago, in a quiet valley, a small village woke to the sound of rain.' },
 ];
 
 
@@ -143,7 +140,7 @@ export const VoiceStudio: React.FC<VoiceStudioProps> = ({
 
       // Find the selected ElevenLabs character name if in ElevenLabs mode
       const elCharacter = useElevenLabs
-        ? (ELEVENLABS_BRIDGE_VOICES.find(v => v.id === project.selectedVoice)?.character || undefined)
+        ? (ELEVENLABS_VOICES.find(v => v.id === project.selectedVoice)?.character || undefined)
         : undefined;
 
       const body = useElevenLabs
@@ -352,12 +349,12 @@ export const VoiceStudio: React.FC<VoiceStudioProps> = ({
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-slate-950 border-2 border-sky-400/60 shadow-lg shrink-0">
-              <img
-                src={project.avatarUrl}
+              {project.avatarUrl ? (<img
+                src={project.avatarUrl || undefined}
                 alt="Cast Avatar"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
-              />
+              />) : null}
               <div className="absolute bottom-0 inset-x-0 bg-slate-950/80 py-0.5 text-center text-[8px] font-mono text-sky-300 uppercase">
                 Speaker
               </div>
@@ -543,10 +540,10 @@ export const VoiceStudio: React.FC<VoiceStudioProps> = ({
                 <span className="text-amber-400 text-xs shrink-0 mt-0.5">⚠️</span>
                 <p className="text-[11px] text-amber-300/80 leading-tight">
                   Requires <code className="font-mono">ELEVENLABS_API_KEY</code> in your <code className="font-mono">.env</code> file.
-                  Each character is pre-mapped to an ElevenLabs voice optimized for their biblical role.
+                  Pick any of the voices below.
                 </p>
               </div>
-              {ELEVENLABS_BRIDGE_VOICES.map((v) => {
+              {ELEVENLABS_VOICES.map((v) => {
                 const isSelected = project.selectedVoice === v.id;
                 return (
                   <div
@@ -614,7 +611,7 @@ export const VoiceStudio: React.FC<VoiceStudioProps> = ({
 
             {project.showSubtitles && (
               <div className="flex gap-1.5 pt-1">
-                {(['glass_pill', 'retro_terminal', 'comic_bubble', 'minimal'] as const).map((style) => (
+                {(['pill', 'typewriter', 'comic_bubble', 'minimal'] as const).map((style) => (
                   <button
                     key={style}
                     type="button"

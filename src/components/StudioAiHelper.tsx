@@ -47,7 +47,7 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
     title: 'AI App Architect & Production Director',
     headline: 'Decompose high-level app concepts into multi-avatar rosters, distinct voices, scene art, and Claude Code bundles',
     description:
-      'Describe your complete app vision (e.g., "The Bridge: a spiritual Christian app with 8 avatars, distinct voices, landing screens, and UI"). The AI produces a comprehensive plan, edge case mitigations, and ready-to-push GitHub files.',
+      'Describe your complete app idea in plain words (e.g., "a study app with 4 friendly coaches, calm backdrops and simple icons"). The AI produces a comprehensive plan, edge case mitigations, and ready-to-push GitHub files.',
     steps: [
       {
         label: '1. State Your Comprehensive Vision',
@@ -67,27 +67,27 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
       },
     ],
     proTips: [
-      'Click "Save to Project Vault" to auto-create a dedicated folder in your project manager populated with all 8 avatars and scenes.',
+      'Click "Save to Project Vault" to auto-create a dedicated folder in your project manager populated with all your avatars and scenes.',
       'Use the "Audition Voice" buttons to test voice modulation in real-time before committing to your repository.',
     ],
     defaultBrainstorms: [
       {
-        title: 'The Bridge Spiritual Companion',
-        description: 'Christian app with 8 pastoral and mentor guides, peaceful sanctuary backdrops, and daily prayer cards.',
-        promptValue: "Hey, I'm building an app called The Bridge. It's a spiritual Christian app. I need eight avatars. I need them all to have their different voices. I need artwork for each landing screen. I need the UI basically for everything. Let's go.",
-        tags: ['Spiritual', 'Christian', '8 Avatars', 'Voices'],
+        title: 'Study Helper App',
+        description: 'A learning app with a few friendly coaches, calm backdrops and simple icons.',
+        promptValue: "I'm building a study helper app for college students. I need 4 friendly coaches with different voices, calm backdrops for each main screen, and simple clean icons.",
+        tags: ['Education', '4 Avatars', 'Calm'],
       },
       {
-        title: 'Cyberpunk Neon RPG',
-        description: 'Dystopian deckbuilder with 8 faction leaders, synthetic robotic voices, and holographic UI cards.',
-        promptValue: "I'm building Neon Odyssey, a gritty cyberpunk deckbuilder. I need 8 faction heads, dark synthwave voices, dystopian neon backdrops, and glowing holographic UI cards.",
-        tags: ['Cyberpunk', 'RPG', 'Synth Voices'],
+        title: 'Fitness Coach App',
+        description: 'Short daily workouts led by encouraging coaches.',
+        promptValue: "I'm building a fitness app with 3 coaches: one strength, one yoga, one cardio. Each needs a different voice, bright backdrops, and badge icons for streaks.",
+        tags: ['Fitness', '3 Avatars', 'Energetic'],
       },
       {
-        title: 'Holistic Mindfulness Sanctuary',
-        description: 'Somatic wellness app with 6 calming meditation coaches, nature backdrops, and peaceful ambient audio.',
-        promptValue: "I'm building Aura Health, a holistic wellness and somatic breathwork app. I need 6 gentle coaches with calming resonant voices, sunrise nature backdrops, and organic minimalist UI badges.",
-        tags: ['Wellness', 'Meditation', 'Calm'],
+        title: 'Wellness & Meditation App',
+        description: 'Gentle guides, quiet scenery and soft music.',
+        promptValue: "I'm building a meditation app with 4 gentle guides, calm nature backdrops, soft ambient music, and simple rounded icons.",
+        tags: ['Wellness', 'Calm', 'Nature'],
       },
     ],
   },
@@ -105,7 +105,7 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
       {
         label: '2. Customize Wardrobe & Accessories',
         detail:
-          'Combine distinct jackets, hoodies, cyber visors, or glasses to reflect your brand personality.',
+          'Combine jackets, hoodies, glasses or hats to match your brand personality.',
       },
       {
         label: '3. Enable Style Primer Lock',
@@ -124,22 +124,22 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
     ],
     defaultBrainstorms: [
       {
-        title: 'Cybernetic Tech Companion',
-        description: 'Futuristic guide with glowing holographic ocular visor and neon trim jacket.',
-        promptValue: '3D stylized digital companion with sleek cyan cybernetic visor, friendly smile, tailored tactical jacket with glowing geometric circuits, high contrast studio lighting',
-        tags: ['Sci-Fi', '3D', 'Mascot'],
+        title: 'Friendly Welcome Guide',
+        description: 'Warm, approachable host for a first-run screen.',
+        promptValue: 'Friendly guide with a warm smile, casual sweater, short curly hair, welcoming wave, soft even lighting',
+        tags: ['Guide', 'Friendly', 'Welcome'],
       },
       {
-        title: 'Strategic Executive Host',
-        description: 'Sharp corporate onboarding advisor with tailored blazer and welcoming posture.',
-        promptValue: 'Polished modern product advisor in tailored navy blazer, crisp posture, warm welcoming expression, subtle gold accents, studio portrait lighting',
-        tags: ['Corporate', 'SaaS', 'Host'],
+        title: 'Professional Advisor',
+        description: 'Clean, trustworthy look for a business or finance app.',
+        promptValue: 'Polished product advisor in a navy blazer, calm confident expression, neat hair, soft studio lighting',
+        tags: ['Business', 'Advisor', 'Host'],
       },
       {
-        title: 'Playful Gamified Mascot',
-        description: 'Charming rounded character with expressive large eyes and pillowy textures.',
-        promptValue: 'Cute spherical robot mascot character with rounded ears, expressive digital LED eyes, smooth matte texture, energetic waving gesture',
-        tags: ['Gaming', 'Casual', 'Cute'],
+        title: 'Round Mascot',
+        description: 'Simple rounded character with a big smile.',
+        promptValue: 'Cute round mascot character with big friendly eyes, simple shapes, bright flat colors, waving hello',
+        tags: ['Mascot', 'Casual', 'Cute'],
       },
     ],
   },
@@ -157,7 +157,7 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
       {
         label: '2. Apply Depth & Lighting Modifiers',
         detail:
-          'Select cinematic volumetric lighting, neon outrun glow, or soft daylight to match your avatar lighting.',
+          'Pick soft daylight, warm evening light or dramatic light to match your avatar.',
       },
       {
         label: '3. Test Motion Zoom Animation',
@@ -171,22 +171,22 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
     ],
     defaultBrainstorms: [
       {
-        title: 'Neon Skyscraper Overlook',
-        description: 'Towering panoramic view of a futuristic skyline bathed in cyan and magenta rain reflections.',
-        promptValue: 'Panoramic glass observation deck overlooking futuristic megalopolis with neon holographic towers, subtle atmospheric mist, raytraced reflections, dark cinematic sky',
-        tags: ['Cyberpunk', '16:9', 'Atmospheric'],
+        title: 'Sunrise Hills',
+        description: 'Warm orange sky over layered hills.',
+        promptValue: 'Wide rolling hills at sunrise, warm orange and yellow sky, soft layered shapes, calm and open',
+        tags: ['Nature', '16:9', 'Warm'],
       },
       {
-        title: 'Minimalist Sunrise Workspace',
-        description: 'Crisp architectural glass interior with natural warm sunlight and generous negative space.',
-        promptValue: 'Modern architectural loft studio with floor-to-ceiling glass windows, soft morning golden sunlight, minimalist indoor greenery, elegant clean surfaces',
-        tags: ['SaaS', 'Clean', 'Modern'],
+        title: 'Bright Workspace',
+        description: 'Clean room with natural light and plants.',
+        promptValue: 'Bright modern workspace with large windows, soft morning light, a few green plants, clean uncluttered surfaces',
+        tags: ['Clean', 'Modern', 'Indoor'],
       },
       {
-        title: 'Deep Cosmic Nebula Horizon',
-        description: 'Ethereal celestial starfield with violet and teal planetary rings.',
-        promptValue: 'Stunning deep space horizon with glowing turquoise and violet nebula clouds, distant planetary rings, crisp celestial stars, deep contrast background',
-        tags: ['Cosmic', 'Sci-Fi', 'Epic'],
+        title: 'Quiet Lake',
+        description: 'Still water and soft mountains.',
+        promptValue: 'Calm blue lake with distant soft mountains, clear sky, gentle reflections, peaceful and quiet',
+        tags: ['Calm', 'Nature', 'Peaceful'],
       },
     ],
   },
@@ -218,22 +218,22 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
     ],
     defaultBrainstorms: [
       {
-        title: 'Prism App Launcher Squircle',
-        description: 'High-gloss isometric crystal prism icon with subtle inner illumination.',
-        promptValue: 'High-gloss 3D isometric app launcher icon with rounded squircle borders, glowing central geometric crystal prism, deep indigo and cyan bevels, clean dark studio shadow',
+        title: 'Rounded App Icon',
+        description: 'A simple friendly launcher icon.',
+        promptValue: 'Simple app launcher icon with rounded square shape, one clear symbol in the center, flat colors, clean edges',
         tags: ['App Icon', 'Squircle', '1:1'],
       },
       {
-        title: 'Store Feature Splash Header',
-        description: 'Widescreen store banner showing floating interface modules and glowing analytics nodes.',
-        promptValue: 'Widescreen App Store hero banner featuring floating futuristic UI glass cards, holographic charts, soft ambient glow, sophisticated enterprise dark palette',
+        title: 'Store Banner',
+        description: 'Wide banner for an app store page.',
+        promptValue: 'Wide app store banner with a friendly character on the left, short empty space on the right for text, flat colors, clean look',
         tags: ['Banner', '16:9', 'Store'],
       },
       {
-        title: 'Mastery Achievement Emblem',
-        description: 'Gamified metallic badge with golden laurels and radiating central energy crest.',
-        promptValue: 'Tactile 3D gamification achievement badge medal, polished titanium trim, radiant central power crest, clean isolated dark backdrop, mobile game reward style',
-        tags: ['Badge', 'Gamification', 'Reward'],
+        title: 'Streak Badge',
+        description: 'A small reward badge.',
+        promptValue: 'Round achievement badge with a simple flame symbol, flat gold and orange colors, clean outline, plain background',
+        tags: ['Badge', 'Reward', 'Streak'],
       },
     ],
   },
@@ -256,7 +256,7 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
       {
         label: '3. Apply Emotional Direction & Modulation',
         detail:
-          'Adjust pitch and speed sliders or toggle robotic/cybernetic modulation filters for unique character voices.',
+          'Adjust the pitch and speed sliders to give each character a different voice.',
       },
     ],
     proTips: [
@@ -265,21 +265,21 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
     ],
     defaultBrainstorms: [
       {
-        title: 'Energetic Welcome Hook',
-        description: 'Warm and encouraging opening line designed to spark user motivation.',
-        promptValue: 'Welcome aboard! Everything is set up and optimized for you. Let’s jump in and make something incredible today!',
-        tags: ['Upbeat', 'Friendly', 'Kore'],
+        title: 'Warm Welcome',
+        description: 'Friendly opening line to start the app.',
+        promptValue: "Welcome! Everything is set up. Let's take a quick look around, and then you can get started.",
+        tags: ['Friendly', 'Welcome', 'Kore'],
       },
       {
-        title: 'Cyberpunk System Boot',
-        description: 'High-tech terminal authorization line with urgent technological flair.',
-        promptValue: 'Neural interface online. Encryption keys verified. Welcome to the core network, operative.',
-        tags: ['Sci-Fi', 'Fenrir', 'Robotic'],
+        title: 'Short Instruction',
+        description: 'A clear, calm how-to line.',
+        promptValue: 'Tap the button at the bottom to begin. You can come back to this screen any time.',
+        tags: ['Clear', 'Calm', 'Zephyr'],
       },
       {
-        title: 'Calm Mindfulness Breathing',
-        description: 'Gentle, soothing intro designed for wellness and focus apps.',
-        promptValue: 'Take a deep breath and settle in. This is your dedicated quiet space to refocus and recharge.',
+        title: 'Calm Breathing',
+        description: 'Gentle line for wellness and focus apps.',
+        promptValue: 'Take a deep breath and settle in. This is your quiet space to refocus.',
         tags: ['Calm', 'Soothing', 'Zephyr'],
       },
     ],
@@ -293,7 +293,7 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
       {
         label: '1. Choose Soundtrack Style',
         detail:
-          'Select Synthwave Pulse, Lo-Fi Chill, Corporate Upbeat, Chiptune 8-Bit, or Ambient Space.',
+          'Select Steady Pulse, Lo-Fi Chill, Bright Start, Chiptune 8-Bit, or Soft Air.',
       },
       {
         label: '2. Formulate Lyria Prompt',
@@ -312,22 +312,22 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
     ],
     defaultBrainstorms: [
       {
-        title: 'Chill Lo-Fi Focus Groove',
-        description: 'Warm vinyl crackle, gentle electric piano chords, and a relaxed 80 BPM hip-hop beat.',
-        promptValue: 'Warm electric Rhodes piano chords, gentle vinyl dust crackle, smooth 82 BPM downtempo hip-hop drums, relaxing focus ambience',
+        title: 'Chill Lo-Fi Groove',
+        description: 'Warm piano chords and a relaxed beat.',
+        promptValue: 'Warm electric piano chords, gentle vinyl crackle, relaxed 82 BPM drums, easy focus background',
         tags: ['Lo-Fi', 'Relaxing', '82 BPM'],
       },
       {
-        title: 'Retro Synthwave Arpeggio',
-        description: 'Driving analog synthesizers and punchy snare drums for energetic tech apps.',
-        promptValue: 'Driving 80s analog synthesizer arpeggio, punchy gated reverb drums, neon synthwave bassline, uplifting futuristic momentum',
-        tags: ['Synthwave', 'Tech', '118 BPM'],
+        title: 'Bright Acoustic Start',
+        description: 'Light guitar and upbeat percussion.',
+        promptValue: 'Light acoustic guitar strumming, soft hand percussion, cheerful upbeat mood, 110 BPM, friendly and clean',
+        tags: ['Upbeat', 'Acoustic', '110 BPM'],
       },
       {
-        title: 'Ambient Deep Space Drift',
-        description: 'Slow-evolving harmonic pads and shimmering sonic textures for peaceful exploration.',
-        promptValue: 'Slow evolving celestial synth pads, ethereal glass textures, subtle warm sub-bass, peaceful deep space meditation soundtrack',
-        tags: ['Ambient', 'Peaceful', 'Space'],
+        title: 'Soft Ambient Pads',
+        description: 'Slow pads for quiet screens.',
+        promptValue: 'Slow soft pads, warm low hum, very gentle movement, calm and open background music',
+        tags: ['Ambient', 'Peaceful', 'Slow'],
       },
     ],
   },
@@ -354,27 +354,27 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
       },
     ],
     proTips: [
-      'For best results, describe lighting changes, such as sunlight filtering through trees or neon signs flickering.',
+      'For best results, describe lighting changes, such as sunlight filtering through trees or clouds drifting past.',
       'Keep actions clear and focused rather than overcrowding multiple scene transitions into one short clip.',
     ],
     defaultBrainstorms: [
       {
-        title: 'Cinematic Flying Skyline Pan',
-        description: 'Camera sweeps smoothly past futuristic skyscrapers as sunset reflects on glass facades.',
-        promptValue: 'Cinematic forward drone flight through futuristic city canyon, golden hour light reflecting off towering glass skyscrapers, smooth steady motion, 4k photorealistic',
-        tags: ['Drone', 'City', 'Cinematic'],
+        title: 'Sunrise Valley Pan',
+        description: 'Slow camera move across green hills.',
+        promptValue: 'Slow cinematic camera pan across a green valley at sunrise, soft golden light, smooth steady motion',
+        tags: ['Nature', 'Pan', 'Cinematic'],
       },
       {
-        title: 'Holographic Mascot Boot Up',
-        description: 'A 3D character forms from shimmering digital particles and smiles at the viewer.',
-        promptValue: 'Camera orbital dolly around glowing cyan holographic robot mascot as digital energy converges into its visor, character smiles warmly and waves at camera',
-        tags: ['Mascot', 'Hologram', 'Intro'],
+        title: 'Mascot Waves Hello',
+        description: 'A friendly character waves at the camera.',
+        promptValue: 'Friendly cartoon mascot waves at the camera and smiles, simple background, gentle camera push-in',
+        tags: ['Mascot', 'Intro', 'Friendly'],
       },
       {
-        title: 'Abstract Particle Warp Flow',
-        description: 'Fluid geometric particles moving in hypnotic waves, ideal for splash screen backdrops.',
-        promptValue: 'Hypnotic fluid motion of iridescent silk ribbon particles flowing through deep dark space, soft illumination, smooth continuous motion',
-        tags: ['Abstract', 'Fluid', 'Splash'],
+        title: 'Soft Moving Shapes',
+        description: 'Slow abstract shapes for a splash screen.',
+        promptValue: 'Slow flowing soft pastel shapes drifting across the screen, smooth continuous motion, clean background',
+        tags: ['Abstract', 'Soft', 'Splash'],
       },
     ],
   },
@@ -406,22 +406,22 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
     ],
     defaultBrainstorms: [
       {
-        title: 'Mobile Gamified Splash',
-        description: 'Puck mascot with energetic voice and retro chiptune soundtrack.',
-        promptValue: 'High-energy opening sequence tailored for vertical smartphone gaming apps',
-        tags: ['Mobile', 'Gaming', 'Puck'],
+        title: 'Mobile Welcome Screen',
+        description: 'Mascot greets the user on a phone.',
+        promptValue: 'A short friendly welcome sequence for a vertical phone screen',
+        tags: ['Mobile', 'Welcome', 'Puck'],
       },
       {
-        title: 'Executive SaaS Dashboard Welcome',
-        description: 'Elena Cross advisor in prism workspace with subtle ambient background music.',
-        promptValue: 'Polished corporate welcome sequence with professional analytics guidance',
-        tags: ['SaaS', 'Web Modal', 'Elena'],
+        title: 'Dashboard Walkthrough',
+        description: 'Guide introduces the main page.',
+        promptValue: 'A calm product walkthrough that points out the three main areas of the dashboard',
+        tags: ['Web Modal', 'Guide', 'Zephyr'],
       },
       {
-        title: 'Cyberpunk Action Story Opening',
-        description: 'Fenrir operative with modulated voice and driving synthwave pulse.',
-        promptValue: 'Dramatic cinematic cutscene with neon megacity and urgent mission briefing',
-        tags: ['Sci-Fi', 'Widescreen', 'Fenrir'],
+        title: 'Story Opening',
+        description: 'Narrated opening for a story-style app.',
+        promptValue: 'A quiet narrated opening with a still backdrop and soft music',
+        tags: ['Widescreen', 'Narrator', 'Charon'],
       },
     ],
   },
@@ -439,7 +439,7 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
       {
         label: '2. Search Across All Projects',
         detail:
-          'Use the Search Bar and Tag Filter chips to instantly find specific assets (e.g. #icon, #cyberpunk, #1K).',
+          'Use the Search Bar and Tag Filter chips to instantly find specific assets (e.g. #icon, #watercolor, #1K).',
       },
       {
         label: '3. Set Master Style Anchors',
@@ -453,22 +453,22 @@ const STUDIO_GUIDES: Record<StudioScreenId, StudioGuideInfo> = {
     ],
     defaultBrainstorms: [
       {
-        title: 'Fintech Banking Mobile App',
-        description: 'Clean obsidian glass visuals with gold accents and trustworthy executive voice.',
-        promptValue: 'Obsidian glass theme with gold accents, minimalist security badges, and professional guidance',
-        tags: ['Fintech', 'Obsidian', 'Security'],
+        title: 'Banking App',
+        description: 'Clean, trustworthy look.',
+        promptValue: 'A mobile banking app with a clean flat vector style, deep blue and white colors, and a calm professional guide',
+        tags: ['Finance', 'Flat Vector', 'Trust'],
       },
       {
-        title: 'Pixel RPG Quest Adventure',
-        description: '16-bit arcade sprites, chiptune soundtrack, and dramatic narrator speech.',
-        promptValue: 'Retro 16-bit arcade adventure with pixel art characters and nostalgic chiptune audio',
-        tags: ['Retro', 'Pixel Art', 'Gaming'],
+        title: 'Kids Reading App',
+        description: 'Bright and friendly.',
+        promptValue: 'A reading app for kids with a round friendly mascot, bright flat colors and playful music',
+        tags: ['Kids', 'Mascot', 'Bright'],
       },
       {
-        title: 'Wellness & Sleep Meditation',
-        description: 'Soft pastel claymorphism visuals, calming Zephyr voice, and soothing ambient tones.',
-        promptValue: 'Peaceful mindfulness companion with soft claymorphism visuals and ambient soundtrack',
-        tags: ['Wellness', 'Claymorphism', 'Calm'],
+        title: 'Sleep & Relax App',
+        description: 'Soft and quiet.',
+        promptValue: 'A sleep app with a soft watercolor style, evening sky backdrops and slow ambient music',
+        tags: ['Sleep', 'Watercolor', 'Calm'],
       },
     ],
   },
@@ -566,7 +566,7 @@ export const StudioAiHelper: React.FC<StudioAiHelperProps> = ({
               role: 'user',
               content: `You are an expert creative AI designer for a digital app development studio.
 Generate 3 fresh, creative, highly specific prompt ideas for the "${guide.title}" feature.
-The user is working on an app named "${activeProject?.name || project.projectName || 'My App'}" with the style theme: "${primer?.styleName || 'Modern High-Tech'}" (${primer?.artMedium || 'Digital'}).
+The user is working on an app named "${activeProject?.name || project.projectName || 'My App'}" with the style theme: "${primer?.styleName || 'Flat Vector'}" (${primer?.artMedium || 'Digital'}).
 Primary color: ${primer?.colorPalette?.primary || '#6366f1'}.
 
 Return ONLY a valid JSON array of 3 objects with these exact keys:

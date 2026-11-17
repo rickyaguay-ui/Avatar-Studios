@@ -7,7 +7,6 @@ import {
   StudioProject,
   ProjectFolder,
 } from '../types.ts';
-import { THE_BRIDGE_BLUEPRINT } from '../data/theBridgePreset.ts';
 import {
   Wand2,
   Sparkles,
@@ -43,6 +42,24 @@ interface AppArchitectStudioProps {
   onPrePlayIntro: (focusMode?: 'all' | 'avatar_voice_only') => void;
 }
 
+const EMPTY_BLUEPRINT: AppArchitectBlueprint = {
+  id: 'empty',
+  appName: '',
+  tagline: '',
+  targetAudience: '',
+  userPromptSummary: '',
+  aestheticTheme: '',
+  colorPalette: { primary: '#4f46e5', secondary: '#38bdf8', accent: '#f59e0b', background: '#0f172a', surface: '#1e293b' },
+  styleDirectives: '',
+  avatars: [],
+  scenes: [],
+  uiAssets: [],
+  checklist: [],
+  edgeCases: [],
+  gitHubPlan: { repoName: '', folderStructure: '', dependencies: [], claudeMdContent: '', bashSetupScript: '', packageJsonSnippet: '' } as any,
+  createdAt: 0,
+};
+
 export function AppArchitectStudio({
   currentProject,
   activeProjectFolder,
@@ -51,40 +68,18 @@ export function AppArchitectStudio({
   onNavigateScreen,
   onPrePlayIntro,
 }: AppArchitectStudioProps) {
-  const [promptInput, setPromptInput] = useState(
-    "Hey, I'm building an app called The Bridge. It's a spiritual Christian app. I need eight avatars. I need them all to have their different voices. I need artwork for each landing screen. I need the UI basically for everything. Let's go."
-  );
+  const [promptInput, setPromptInput] = useState('');
   const [avatarCount, setAvatarCount] = useState<number>(8);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [activeBlueprint, setActiveBlueprint] = useState<AppArchitectBlueprint>(THE_BRIDGE_BLUEPRINT);
+  const [generatedBlueprint, setActiveBlueprint] = useState<AppArchitectBlueprint | null>(null);
+  const hasBlueprint = generatedBlueprint !== null;
+  const activeBlueprint: AppArchitectBlueprint = generatedBlueprint ?? EMPTY_BLUEPRINT;
   const [activeTab, setActiveTab] = useState<'checklist' | 'avatars' | 'scenes' | 'ui' | 'edge_cases' | 'claude_github'>('checklist');
 
   // Interactive Audition State
   const [auditioningAvatarId, setAuditioningAvatarId] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [appliedNotice, setAppliedNotice] = useState<string | null>(null);
-
-  // Quick preset options
-  const samplePrompts = [
-    {
-      title: 'The Bridge (Spiritual Christian App)',
-      prompt:
-        "Hey, I'm building an app called The Bridge. It's a spiritual Christian app. I need eight avatars. I need them all to have their different voices. I need artwork for each landing screen. I need the UI basically for everything. Let's go.",
-      avatarCount: 8,
-    },
-    {
-      title: 'Neon Odyssey (Cyberpunk Roguelike)',
-      prompt:
-        "I'm building Neon Odyssey, a gritty cyberpunk deckbuilder. I need 8 faction heads, dark synthwave voices, dystopian neon backdrops, and glowing holographic UI cards.",
-      avatarCount: 8,
-    },
-    {
-      title: 'Aura Health (Mindfulness Sanctuary)',
-      prompt:
-        "I'm building Aura Health, a holistic wellness and somatic breathwork app. I need 6 gentle coaches with calming resonant voices, sunrise nature backdrops, and organic minimalist UI badges.",
-      avatarCount: 6,
-    },
-  ];
 
   const handleCopy = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
@@ -98,19 +93,6 @@ export function AppArchitectStudio({
     setAppliedNotice(null);
 
     try {
-      // Check if user specifically requested The Bridge
-      const isBridge =
-        promptInput.toLowerCase().includes('bridge') &&
-        (promptInput.toLowerCase().includes('spiritual') || promptInput.toLowerCase().includes('christian'));
-
-      if (isBridge && avatarCount === 8) {
-        // Instant load the high-fidelity curated Bridge blueprint
-        setActiveBlueprint(THE_BRIDGE_BLUEPRINT);
-        setAppliedNotice('✨ "The Bridge" production blueprint loaded with 8 avatars, distinct voices, and 4K scenes!');
-        setIsGenerating(false);
-        return;
-      }
-
       const res = await fetch('/api/architect/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -132,9 +114,8 @@ export function AppArchitectStudio({
         throw new Error('Invalid blueprint payload');
       }
     } catch (err: any) {
-      console.warn('Blueprint generation API error, using curated template:', err);
-      setActiveBlueprint(THE_BRIDGE_BLUEPRINT);
-      setAppliedNotice('✨ Generated architecture blueprint loaded with full assets and Claude Code handoff!');
+      console.warn('Blueprint generation failed:', err);
+      setAppliedNotice('Could not generate a plan. Check that GEMINI_API_KEY is set in your .env file, then try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -207,12 +188,16 @@ export function AppArchitectStudio({
 
   // Toggle checklist item
   const handleToggleChecklist = (id: string) => {
-    setActiveBlueprint((prev) => ({
-      ...prev,
-      checklist: prev.checklist.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      ),
-    }));
+    setActiveBlueprint((prev) =>
+      prev
+        ? {
+            ...prev,
+            checklist: prev.checklist.map((item) =>
+              item.id === id ? { ...item, completed: !item.completed } : item
+            ),
+          }
+        : prev
+    );
   };
 
   // Calculate checklist progress
@@ -268,7 +253,7 @@ export function AppArchitectStudio({
             </div>
 
             {/* Quick Stats Pill */}
-            <div className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
+            {hasBlueprint && <div className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
               <div className="flex items-center gap-1.5 text-slate-300 font-semibold">
                 <Users className="w-3.5 h-3.5 text-indigo-400" />
                 <span>{activeBlueprint.avatars.length} Avatars</span>
@@ -283,7 +268,7 @@ export function AppArchitectStudio({
                 <GitBranch className="w-3.5 h-3.5" />
                 <span>Claude Ready</span>
               </div>
-            </div>
+            </div>}
           </div>
 
           {/* Prompt Input Box */}
@@ -320,7 +305,7 @@ export function AppArchitectStudio({
                 value={promptInput}
                 onChange={(e) => setPromptInput(e.target.value)}
                 rows={3}
-                placeholder="Describe your vision (e.g., 'Hey, I'm building an app called The Bridge. It's a spiritual Christian app. I need eight avatars. I need them all to have their different voices. I need artwork for each landing screen. I need the UI basically for everything. Let's go.')"
+                placeholder="Describe your app in your own words: what it does, who uses it, how many avatars you need, and what feeling you want."
                 className="w-full px-4 py-3 bg-slate-900/90 border border-slate-800 focus:border-amber-500/60 rounded-2xl text-slate-100 text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none transition resize-none leading-relaxed shadow-inner"
               />
               <button
@@ -346,24 +331,6 @@ export function AppArchitectStudio({
                 )}
               </button>
             </div>
-
-            {/* Fast Presets Bar */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="text-[11px] font-semibold text-slate-400">Quick Inspirations:</span>
-              {samplePrompts.map((preset, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => {
-                    setPromptInput(preset.prompt);
-                    setAvatarCount(preset.avatarCount);
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-slate-900/80 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/40 text-[11px] font-medium text-slate-300 hover:text-amber-300 transition cursor-pointer"
-                >
-                  {preset.title}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       </div>
@@ -382,6 +349,14 @@ export function AppArchitectStudio({
         </div>
       )}
 
+      {!hasBlueprint && !appliedNotice && (
+        <div className="rounded-2xl border border-dashed border-slate-800 p-6 text-sm text-slate-400">
+          Nothing here yet. Describe your app above and press generate. You'll get a plan with avatars, voices,
+          backgrounds and icons to start from. Nothing is pre-filled.
+        </div>
+      )}
+
+      {hasBlueprint && (<>
       {/* Active Blueprint Summary Bar & Action Hub */}
       <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-3">
@@ -406,7 +381,7 @@ export function AppArchitectStudio({
             type="button"
             onClick={() => {
               onSaveBlueprintToProjectVault(activeBlueprint);
-              setAppliedNotice(`Saved "${activeBlueprint.appName}" to Project Vault with all 8 avatars & scenes!`);
+              setAppliedNotice(`Saved "${activeBlueprint.appName}" to Project Vault with its avatars & scenes!`);
             }}
             className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-md shadow-indigo-600/20"
           >
@@ -441,7 +416,7 @@ export function AppArchitectStudio({
       <div className="flex items-center gap-1 border-b border-slate-800 overflow-x-auto pb-px">
         {[
           { id: 'checklist', label: 'Production Checklist', icon: ListTodo, count: `${completedCount}/${activeBlueprint.checklist.length}` },
-          { id: 'avatars', label: '8-Avatar & Voice Roster', icon: Users, count: activeBlueprint.avatars.length },
+          { id: 'avatars', label: 'Avatar & Voice Roster', icon: Users, count: activeBlueprint.avatars.length },
           { id: 'scenes', label: 'Screen Backdrops', icon: ImageIcon, count: activeBlueprint.scenes.length },
           { id: 'ui', label: 'UI Art & Icon Kit', icon: LayoutGrid, count: activeBlueprint.uiAssets.length },
           { id: 'edge_cases', label: 'Edge Cases & Defenses', icon: ShieldAlert, count: activeBlueprint.edgeCases.length },
@@ -569,14 +544,14 @@ export function AppArchitectStudio({
         </div>
       )}
 
-      {/* Tab 2: 8-Avatar & Voice Roster */}
+      {/* Tab 2: Avatar & Voice Roster */}
       {activeTab === 'avatars' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 <Users className="w-4 h-4 text-indigo-400" />
-                <span>Multi-Avatar Persona & Voice Roster ({activeBlueprint.avatars.length})</span>
+                <span>Avatar Persona & Voice Roster ({activeBlueprint.avatars.length})</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
                 Each guide possesses a dedicated voice timbre, pitch modulation, demographic persona, and introductory scripture greeting.
@@ -692,7 +667,7 @@ export function AppArchitectStudio({
                 <span>Screen & Landing Scenery ({activeBlueprint.scenes.length})</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                Photorealistic sacred architectural and natural environments for all primary screens in The Bridge.
+                Backdrops for each main screen of your app.
               </p>
             </div>
 
@@ -771,10 +746,10 @@ export function AppArchitectStudio({
             <div>
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 <LayoutGrid className="w-4 h-4 text-indigo-400" />
-                <span>Spiritual UI Design & Iconography Kit ({activeBlueprint.uiAssets.length})</span>
+                <span>UI Art & Icon Kit ({activeBlueprint.uiAssets.length})</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                Sacred brand marks, achievement badges, and container frames ready to integrate into your frontend.
+                Brand marks, badges and frames ready to drop into your app.
               </p>
             </div>
 
@@ -933,13 +908,13 @@ export function AppArchitectStudio({
               </label>
               <div className="flex items-center gap-2">
                 <div className="flex-1 p-3 bg-slate-900 border border-slate-800 rounded-xl font-mono text-xs text-amber-300 truncate">
-                  claude --prompt "Read CLAUDE.md and implement the complete 8-avatar voice and screen routing for {activeBlueprint.appName}"
+                  claude --prompt "Read CLAUDE.md and implement the complete avatar voice and screen routing for {activeBlueprint.appName}"
                 </div>
                 <button
                   type="button"
                   onClick={() =>
                     handleCopy(
-                      `claude --prompt "Read CLAUDE.md and implement the complete 8-avatar voice and screen routing for ${activeBlueprint.appName}"`,
+                      `claude --prompt "Read CLAUDE.md and implement the complete avatar voice and screen routing for ${activeBlueprint.appName}"`,
                       'claude-prompt'
                     )
                   }
@@ -1006,6 +981,7 @@ export function AppArchitectStudio({
           </div>
         </div>
       )}
+      </>)}
     </div>
   );
 }

@@ -630,12 +630,12 @@ class AppIntroScreen extends StatelessWidget {
               </span>
             </div>
             <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-950 flex items-center justify-center p-1 mb-2 border border-slate-800">
-              <img
-                src={project.avatarUrl}
+              {project.avatarUrl ? (<img
+                src={project.avatarUrl || undefined}
                 alt="Export avatar"
                 referrerPolicy="no-referrer"
                 className="max-h-full object-contain"
-              />
+              />) : null}
             </div>
             <p className="text-[11px] text-slate-400 leading-tight">
               {selectedProfile === 'android' ? (
@@ -671,12 +671,12 @@ class AppIntroScreen extends StatelessWidget {
               </span>
             </div>
             <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-950 mb-2 border border-slate-800">
-              <img
-                src={project.backgroundUrl}
+              {project.backgroundUrl ? (<img
+                src={project.backgroundUrl || undefined}
                 alt="Export background"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
-              />
+              />) : null}
             </div>
             <p className="text-[11px] text-slate-400 leading-tight">
               {selectedProfile === 'android' ? (

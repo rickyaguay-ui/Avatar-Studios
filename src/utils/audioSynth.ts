@@ -2,14 +2,14 @@ import { decodeAudioFromUrl } from './audioModulator.ts';
 
 /**
  * Web Audio Procedural Sound Engine
- * Generates continuous, harmonious background music tracks (Synthwave, Lo-Fi, Ambient, Chiptune, etc.)
+ * Generates continuous, harmonious background music tracks (Electronic, Lo-Fi, Ambient, Chiptune, etc.)
  * and manages synchronized voiceover mixing with ducking.
  */
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
   private isPlayingMusic: boolean = false;
-  private currentTrackId: string = 'synthwave_pulse';
+  private currentTrackId: string = 'electronic_pulse';
   private musicGainNode: GainNode | null = null;
   private voiceGainNode: GainNode | null = null;
   private masterGainNode: GainNode | null = null;
@@ -90,7 +90,7 @@ class SoundEngine {
       const now = this.ctx.currentTime;
 
       switch (this.currentTrackId) {
-        case 'synthwave_pulse': {
+        case 'electronic_pulse': {
           // Retro bassline + arpeggio
           const bassNotes = [110, 110, 130.81, 146.83, 98, 98, 123.47, 130.81];
           const arpNotes = [220, 261.63, 329.63, 392.0, 440, 523.25, 440, 329.63];
@@ -105,7 +105,7 @@ class SoundEngine {
           break;
         }
 
-        case 'chiptune_arcade': {
+        case 'chiptune_8bit': {
           // 8-bit fast bouncy notes
           const scales = [261.63, 329.63, 392.0, 523.25, 392.0, 329.63, 440.0, 493.88];
           const freq = scales[step % scales.length];
@@ -133,7 +133,7 @@ class SoundEngine {
           break;
         }
 
-        case 'ambient_space': {
+        case 'soft_ambient': {
           // Slow evolving drone
           if (step % 8 === 0) {
             const dronePitches = [98.0, 146.83, 196.0, 220.0, 293.66];

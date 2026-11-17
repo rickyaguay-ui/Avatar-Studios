@@ -23,6 +23,7 @@ import { AppIntroPlayer } from './components/AppIntroPlayer.tsx';
 import { ChatCopilot } from './components/ChatCopilot.tsx';
 import { ExportHub } from './components/ExportHub.tsx';
 import { ExportModal } from './components/ExportModal.tsx';
+import { OnboardingGuide, ONBOARDING_STORAGE_KEY } from './components/OnboardingGuide.tsx';
 import { StudioHistoryModal } from './components/StudioHistoryModal.tsx';
 import { useStudioHistory } from './hooks/useStudioHistory.ts';
 import {
@@ -30,6 +31,7 @@ import {
   signInWithGoogle,
   signOutUser,
   onAuthStateChanged,
+  firebaseEnabled,
   loadUserProjectsFromFirestore,
   saveProjectToFirestore,
   deleteProjectFromFirestore,
@@ -177,7 +179,20 @@ export default function App() {
     styleLockEnabled: activeProject.stylePrimer.locked ?? true,
   }));
 
-  const [activeScreen, setActiveScreen] = useState<StudioScreen>('projects');
+  const [activeScreen, setActiveScreen] = useState<StudioScreen>('avatar');
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    } catch {
+      return true;
+    }
+  });
+  const closeOnboarding = () => {
+    try {
+      localStorage.setItem(ONBOARDING_STORAGE_KEY, '1');
+    } catch {}
+    setShowOnboarding(false);
+  };
   const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [copilotRole, setCopilotRole] = useState<string>('intro_director');
@@ -204,6 +219,7 @@ export default function App() {
 
   // Firebase Auth & Firestore Listener
   useEffect(() => {
+    if (!firebaseEnabled) return;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
@@ -566,7 +582,7 @@ export default function App() {
         name: `${av.name} (${av.role})`,
         folder: 'avatar',
         type: 'image',
-        url: av.imageUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
+        url: av.imageUrl || '/avatars/portrait_eli.png',
         prompt: av.appearancePrompt,
         specs: {
           voiceName: av.voice,
@@ -585,7 +601,7 @@ export default function App() {
         name: sc.name,
         folder: 'background',
         type: 'image',
-        url: sc.imageUrl || 'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1200&auto=format&fit=crop&q=80',
+        url: sc.imageUrl || '/backgrounds/soft_paper.png',
         prompt: sc.prompt,
         specs: {
           aspectRatio: sc.aspectRatio,
@@ -602,7 +618,7 @@ export default function App() {
         name: ui.name,
         folder: 'ui_art',
         type: 'image',
-        url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+        url: '/avatars/mascot_ava.png',
         prompt: ui.prompt,
         specs: {
           uiType: ui.uiType,
@@ -622,8 +638,8 @@ export default function App() {
           id: `style_${projId}`,
           styleName: blueprint.aestheticTheme,
           description: blueprint.tagline,
-          artMedium: 'photorealistic',
-          lightingStyle: 'ambient_warm',
+          artMedium: 'vector_flat',
+          lightingStyle: 'flat_even',
           colorPalette: {
             primary: blueprint.colorPalette.primary,
             secondary: blueprint.colorPalette.secondary,
@@ -737,16 +753,10 @@ export default function App() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-sm sm:text-base font-bold text-white tracking-tight font-display">
-                  AppIntro &amp; Avatar Studio
+                <h1 className="text-sm sm:text-base font-bold text-white tracking-tight font-display whitespace-nowrap">
+                  Avatar Studios
                 </h1>
-                <span className="hidden lg:inline-block text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                  Gemini Multi-Modal
-                </span>
               </div>
-              <p className="text-[11px] text-slate-400 hidden xl:block">
-                Consistent UI art, avatars, backdrops, voices &amp; Veo video filed by project
-              </p>
             </div>
           </div>
 
@@ -954,7 +964,7 @@ export default function App() {
                 <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
-          ) : (
+          ) : firebaseEnabled ? (
             <button
               id="btn-firebase-signin"
               type="button"
@@ -965,7 +975,19 @@ export default function App() {
               <LogIn className="w-3.5 h-3.5 text-indigo-400" />
               <span className="hidden sm:inline">Sign In</span>
             </button>
-          )}
+          ) : null}
+
+          {/* How it works */}
+          <button
+            id="btn-how-it-works"
+            type="button"
+            onClick={() => setShowOnboarding(true)}
+            className="w-8 h-8 shrink-0 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-indigo-300 hover:text-white text-sm font-bold rounded-full flex items-center justify-center transition cursor-pointer"
+            title="How it works (quick walkthrough)"
+            aria-label="How it works"
+          >
+            ?
+          </button>
 
           {/* AI App Architect Direct Button */}
           <button
@@ -977,7 +999,7 @@ export default function App() {
                 ? 'bg-amber-600 text-white border-amber-500 shadow-sm shadow-amber-500/20'
                 : 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
             }`}
-            title="Open AI App Architect & Director (8 Avatars, Voices, Art & Claude Export)"
+            title="Describe your app and get a plan with avatars, voices, art and a Claude Code export"
           >
             <Wand2 className="w-3.5 h-3.5 text-amber-400" />
             <span className="hidden sm:inline">App Architect</span>
@@ -1494,6 +1516,16 @@ export default function App() {
         onClearHistory={clearHistory}
         projectName={activeProject.name}
       />
+
+      {showOnboarding && (
+        <OnboardingGuide
+          onClose={closeOnboarding}
+          onStart={() => {
+            closeOnboarding();
+            setActiveScreen('avatar');
+          }}
+        />
+      )}
 
       {/* Floating Undo/Redo Action Toast Notice */}
       {toastNotice && (

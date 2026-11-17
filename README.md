@@ -8,51 +8,22 @@ Avatar Studios is an end-to-end creative suite for building in-app intro cutscen
 
 ---
 
-## 🌟 Core Studios & Features
+## What it does
 
-1. **AI App Architect**
-   - Single-prompt full app blueprint generation powered by Gemini.
-   - Generates 8-character avatar rosters, multi-screen scene lists, UI icon specs, QA checklists, and edge-case mitigations.
-   - Includes canonical presets such as **The Bridge** (featuring the locked canonical cast: David, Paul, Peter, Moses, Mary, Rahab, Ruth, Mary Magdalene).
+1. **Avatar Studio**: start from ten demo avatars in five art styles (hand-drawn sketch, flat portrait, line art, pixel art, friendly mascot). Flip through them, pick one, then customize the look or generate your own in that style.
+2. **Background Studio**: six built-in backdrops, or generate your own in 1K / 2K / 4K.
+3. **Voice Studio**: spoken lines with five Gemini voices (or ElevenLabs), eight emotions, and pitch / speed controls. Live voice chat and audio transcription.
+4. **Music Studio**: six built-in tracks that play with no key, plus AI-generated music.
+5. **UI Art & Icons**: app icons, banners, badges and cards in your project's style.
+6. **Veo Video Studio**: text-to-video and image-to-video.
+7. **Live Intro Simulator**: plays the avatar, backdrop, voice and music together in a phone, web or full-screen frame.
+8. **Export Hub**: Raw, Web and Android profiles (iOS is a stub), with a JSON manifest.
+9. **Project Vault & Style Primers**: one folder per project, with eight plainly named art styles you can edit.
+10. **AI App Architect**: describe your app and get a plan. It starts empty. Nothing is pre-filled.
 
-2. **Project Vault & Style Priming Engine**
-   - Manage multiple named projects (Mobile, Web Modal, Game Cutscene, Banner, Dashboard).
-   - Style Anchors & Style Lock to enforce aesthetic consistency across all generated assets.
-   - Built-in style primers including **Bible Project** (flat 2D vector / paper-cutout silhouettes, ancient Near-Eastern motifs, muted earthy palette), Cyberpunk Raytraced 3D, Modern SaaS Flat Vector, and Whimsical Claymorphism.
+On first launch a short walkthrough explains the steps. The **?** button in the header reopens it.
 
-3. **Avatar Studio**
-   - Multi-style character generation: `3d_cute`, `cyberpunk`, `anime`, `pixel`, `vector`, and `watercolor` (for full-body watercolor portraits).
-   - Wardrobe customization: 9 hairstyles, 7 tops, 6 bottoms, 5 footwear types, 8 accessories, and 6 body types.
-   - Transparent PNG isolation mode for clean mobile/web UI cutouts.
-   - Live voice auditioning and pitch/speed modulation.
-
-4. **Background Studio**
-   - High-resolution (1K / 2K / 4K) scenic backdrops with aspect ratios (16:9, 1:1, 9:16, 4:3, 3:4).
-   - Dynamic motion preview (zoom, pan, pulse).
-
-5. **UI Art & Icons Studio**
-   - Style-primed icons, badges, hero splash banners, card frames, and button sprites.
-
-6. **Voice Studio & Live Conversation**
-   - Text-to-speech with 5 distinct voices (*Kore, Puck, Charon, Fenrir, Zephyr*) and 8 emotional deliveries.
-   - Pitch (0.5x–1.8x) and Speed (0.6x–1.8x) offline PCM modulation.
-   - Real-time two-way voice chat over WebSockets and audio transcription.
-
-7. **Music Studio**
-   - Built-in Web Audio synthesis engine (6 preset tracks, zero external API latency).
-   - AI music generation with Lyria integration.
-
-8. **Veo Video Studio**
-   - Cinematic text-to-video and image-to-video generation using Google Veo.
-
-9. **Live Intro Simulator (`AppIntroPlayer`)**
-   - Live cross-platform preview in realistic device frames: **Mobile**, **Web Modal**, **Fullscreen**, and **Cutscene**.
-
-10. **Multi-Profile Export Hub (`ExportHub` / `ExportModal`)**
-    - **Raw / Source**: Full-resolution master assets and unconstrained manifest.
-    - **Web**: Flat PNG/WebP assets with drop-in React and HTML embed snippets.
-    - **Android**: Density-bucketed raster resource tree (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`), XML vector drawables, and Jetpack Compose (`AvatarIntroScreen.kt`) integration.
-    - **iOS (Stub)**: Shaped for Xcode `.xcassets` catalog structure with `@1x`, `@2x`, `@3x` scale variants and SwiftUI stubs.
+The app ships with **no pre-built apps or projects**. You start with one empty project.
 
 ---
 
@@ -61,7 +32,7 @@ Avatar Studios is an end-to-end creative suite for building in-app intro cutscen
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS v4, Motion, Lucide React
 - **Audio Engine**: Web Audio API (real-time synthesizer & PCM modulator)
 - **Backend**: Express (`server.ts`), `@google/genai` (Gemini 2.5 / 3.0 / Veo / Lyria), WebSocket (`ws`)
-- **Cloud Persistence**: Optional Firebase Auth & Cloud Firestore sync
+- **Persistence**: browser localStorage plus a local file store. Firebase Auth & Firestore sync is optional and off by default.
 
 ---
 
@@ -71,25 +42,28 @@ Avatar Studios is an end-to-end creative suite for building in-app intro cutscen
 - Node.js (v18+)
 - Gemini API Key
 
-### Installation
+### Installation (Windows PowerShell)
 
-```bash
-# Clone the repository
+```powershell
 git clone https://github.com/rickyaguay-ui/Avatar-Studios.git
 cd Avatar-Studios
-
-# Install dependencies
 npm install
-
-# Configure environment
-cp .env.example .env.local
-# Set GEMINI_API_KEY in .env.local
-
-# Run development server
+Copy-Item .env.example .env
+notepad .env        # set GEMINI_API_KEY
 npm run dev
 ```
+
+Open http://localhost:3000.
+
+- The server reads **`.env`** (not `.env.local`).
+- The starter avatars, backdrops, music, intro player and export work **without any key**. Generating new images, voice, music and video needs `GEMINI_API_KEY`.
+- Firebase is optional. To turn it on, copy `firebase-applet-config.example.json` to `firebase-applet-config.json` and fill in a real config. Without it, sign-in is hidden and projects stay in your browser.
 
 ---
 
 ## 🔒 Security & Version Control
-- `.env*` and `firebase-applet-config.json` are strictly excluded from version control via `.gitignore`.
+- `.env*`, `projects_data.json` and `firebase-applet-config.json` are excluded from version control via `.gitignore`.
+
+## Credits
+
+Demo avatars are CC0 and are listed in `public/avatars/LICENSES.md`.

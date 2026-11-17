@@ -34,7 +34,7 @@ export const MusicStudio: React.FC<MusicStudioProps> = ({
   const [isGeneratingLyria, setIsGeneratingLyria] = useState(false);
   const [lyriaModelType, setLyriaModelType] = useState<'clip' | 'pro'>('clip');
   const [lyriaPrompt, setLyriaPrompt] = useState(
-    'Cinematic futuristic electronic arpeggio soundtrack for mobile app welcome screen'
+    'Warm, calm background music for a mobile app welcome screen'
   );
   const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null);
   const [generatedLyrics, setGeneratedLyrics] = useState<string | null>(null);
@@ -242,7 +242,7 @@ export const MusicStudio: React.FC<MusicStudioProps> = ({
             type="text"
             value={lyriaPrompt}
             onChange={(e) => setLyriaPrompt(e.target.value)}
-            placeholder="E.g. Upbeat 80s synthwave intro soundtrack for mobile app..."
+            placeholder="E.g. Light upbeat acoustic intro music for a mobile app..."
             className="flex-1 px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
           <button

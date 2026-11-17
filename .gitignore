@@ -9,3 +9,6 @@ coverage/
 !.env.example
 firebase-applet-config.json
 !firebase-applet-config.example.json
+
+# Local project data written by the dev server
+projects_data.json

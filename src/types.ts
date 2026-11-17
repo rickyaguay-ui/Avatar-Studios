@@ -4,7 +4,7 @@ export type AspectRatio = '16:9' | '1:1' | '9:16' | '4:3' | '3:4';
 export interface PredefinedScene {
   id: string;
   title: string;
-  category: 'Cyberpunk' | 'Modern Tech' | 'Fantasy' | 'Retro Gaming' | 'Minimalist' | 'Cosmic';
+  category: 'Nature' | 'Calm' | 'Minimal';
   imageUrl: string;
   suggestedMusic: string;
   suggestedTone: string;
@@ -19,6 +19,7 @@ export interface AvatarPreset {
   voice: 'Kore' | 'Puck' | 'Charon' | 'Fenrir' | 'Zephyr';
   defaultDialogue: string;
   tag: string;
+  styleId: AvatarStyleId;
 }
 
 export interface MusicTrack {
@@ -26,7 +27,7 @@ export interface MusicTrack {
   name: string;
   bpm: number;
   mood: string;
-  genre: 'lofi' | 'synthwave' | 'epic' | 'chiptune' | 'ambient' | 'corporate';
+  genre: 'lofi' | 'electronic' | 'epic' | 'chiptune' | 'ambient' | 'corporate';
   description: string;
 }
 
@@ -67,7 +68,7 @@ export type GeminiModel =
   | 'gemini-3.1-flash-lite';
 
 export type AvatarHairstyle = 
-  | 'cyber_buzzcut' 
+  | 'buzzcut' 
   | 'long_wavy' 
   | 'afro_fade' 
   | 'sleek_bob' 
@@ -78,48 +79,60 @@ export type AvatarHairstyle =
   | 'bald_clean';
 
 export type AvatarClothingTop = 
-  | 'cyber_leather_jacket' 
-  | 'executive_blazer' 
-  | 'techwear_hoodie' 
-  | 'nanotech_armor' 
-  | 'minimal_tshirt' 
-  | 'mystic_robe' 
-  | 'flight_bomber';
+  | 'leather_jacket' 
+  | 'blazer' 
+  | 'hoodie' 
+  | 'knit_sweater' 
+  | 'tshirt' 
+  | 'robe' 
+  | 'bomber_jacket';
 
 export type AvatarClothingBottom = 
-  | 'tactical_cargo_pants' 
+  | 'cargo_pants' 
   | 'tailored_trousers' 
-  | 'cyber_joggers' 
-  | 'reinforced_greaves' 
+  | 'joggers' 
+  | 'shorts' 
   | 'denim_jeans' 
-  | 'armored_skirt';
+  | 'pleated_skirt';
 
 export type AvatarShoes = 
-  | 'cyber_high_top_sneakers' 
-  | 'tactical_combat_boots' 
-  | 'polished_oxfords' 
-  | 'hover_mag_kicks' 
-  | 'sleek_runners';
+  | 'high_top_sneakers' 
+  | 'boots' 
+  | 'oxfords' 
+  | 'sandals' 
+  | 'runners';
 
 export type AvatarAccessory = 
   | 'none'
-  | 'holo_visor' 
-  | 'wireframe_glasses' 
-  | 'studio_headset' 
-  | 'cybernetic_mask' 
-  | 'gold_chain_choker' 
-  | 'neon_earring_cuff' 
-  | 'beret_cap';
+  | 'sunglasses' 
+  | 'glasses' 
+  | 'headphones' 
+  | 'scarf' 
+  | 'necklace' 
+  | 'earrings' 
+  | 'hat';
 
 export type AvatarBodyType = 
   | 'athletic' 
   | 'slender' 
   | 'muscular' 
-  | 'compact_chibi' 
-  | 'cyber_cyborg' 
+  | 'compact' 
+  | 'average' 
   | 'curvy';
 
 export type AvatarFraming = 'bust_portrait' | 'half_body' | 'full_body';
+
+export type AvatarStyleId =
+  | 'sketch'
+  | 'flat_portrait'
+  | 'line_art'
+  | 'pixel'
+  | 'mascot'
+  | 'watercolor'
+  | 'comic_book'
+  | 'anime'
+  | '3d_cartoon'
+  | 'painted_portrait';
 
 export interface StudioProject {
   title: string;
@@ -139,7 +152,7 @@ export interface StudioProject {
   avatarPrompt: string;
   avatarSize: ImageSize;
   avatarPose: 'center' | 'left' | 'right';
-  avatarStyle: '3d_cute' | 'cyberpunk' | 'pixel' | 'anime' | 'vector' | 'watercolor' | 'painterly_cinematic' | 'motion_comic' | 'illustrated_portrait';
+  avatarStyle: AvatarStyleId;
   
   // Detailed Avatar Customizations (optional)
   hairstyle?: AvatarHairstyle;
@@ -172,7 +185,7 @@ export interface StudioProject {
 
   // Subtitles & UI
   showSubtitles: boolean;
-  subtitleStyle: 'glass_pill' | 'retro_terminal' | 'comic_bubble' | 'minimal';
+  subtitleStyle: 'pill' | 'typewriter' | 'comic_bubble' | 'minimal';
 
   // Project & Style Priming Engine
   projectId?: string;
@@ -193,25 +206,23 @@ export interface ProjectStylePrimer {
   styleName: string;
   description: string;
   artMedium: 
-    | '3d_raytraced'
-    | '3d_octane' 
     | 'vector_flat' 
     | 'pixel_art' 
     | 'digital_anime' 
     | 'claymorphism' 
-    | 'cyberpunk_glow' 
-    | 'minimalist_duotone' 
+    | 'line_art' 
+    | 'sketch' 
+    | 'watercolor' 
     | 'photorealistic'
-    | 'painterly_cinematic'
-    | 'motion_comic'
+    | 'painterly'
+    | 'comic_book'
     | 'illustrated_portrait';
   lightingStyle: 
     | 'studio_soft' 
-    | 'neon_glow' 
-    | 'dramatic_chiaroscuro' 
+    | 'dramatic' 
     | 'ambient_warm' 
-    | 'cyber_volumetric' 
-    | 'clean_daylight';
+    | 'clean_daylight' 
+    | 'flat_even';
   colorPalette: {
     primary: string;
     secondary: string;

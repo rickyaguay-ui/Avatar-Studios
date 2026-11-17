@@ -63,7 +63,7 @@ const ROLES: { id: ChatRole; label: string; systemInstruction: string; icon: any
     label: 'World & Scene Artist',
     icon: Layers,
     systemInstruction:
-      'You are an Environment Concept Artist specializing in 1K, 2K, and 4K ultra-wide and mobile backdrops (cyberpunk, synthwave, modern clean tech, fantasy, pixel art). Provide vivid visual prompts with depth, lighting, and color theory. When suggesting a background prompt, start with "[BACKGROUND_PROMPT]: ".',
+      'You are an Environment Concept Artist specializing in 1K, 2K, and 4K ultra-wide and mobile backdrops (nature, calm interiors, clean minimal, watercolor, pixel art). Provide vivid visual prompts with depth, lighting, and color theory. When suggesting a background prompt, start with "[BACKGROUND_PROMPT]: ".',
   },
   {
     id: 'music_composer',
@@ -100,7 +100,7 @@ const MODELS: { id: GeminiModel; label: string; desc: string }[] = [
 ];
 
 const QUICK_STARTERS = [
-  'Design a cyberpunk hacker app intro with neon glow',
+  'Design a friendly welcome intro for a study app',
   'Write an onboarding welcome script for a finance wallet',
   'Prompt for a 9:16 portrait video cutscene with Veo 3',
   'Suggest latest 2026 UI trends with search grounding',

@@ -10,6 +10,7 @@ import {
   AvatarBodyType,
   AvatarFraming,
   ProjectAsset,
+  AvatarStyleId,
 } from '../types.ts';
 import { PREDEFINED_AVATARS } from '../data/presets.ts';
 import { soundEngine } from '../utils/audioSynth.ts';
@@ -55,77 +56,77 @@ interface AvatarStudioProps {
 const AVATAR_VOICES = [
   { id: 'Kore', label: 'Kore (Warm Guide)' },
   { id: 'Puck', label: 'Puck (Energetic Mascot)' },
-  { id: 'Charon', label: 'Charon (Deep Commander)' },
+  { id: 'Charon', label: 'Charon (Deep Narrator)' },
   { id: 'Fenrir', label: 'Fenrir (Bold Action)' },
-  { id: 'Zephyr', label: 'Zephyr (Smooth Tech)' },
+  { id: 'Zephyr', label: 'Zephyr (Smooth Guide)' },
 ] as const;
 
 const HAIRSTYLES: { id: AvatarHairstyle; label: string }[] = [
-  { id: 'cyber_buzzcut', label: 'Cyber Buzzcut' },
-  { id: 'long_wavy', label: 'Long Wavy Flow' },
-  { id: 'afro_fade', label: 'Afro Taper Fade' },
-  { id: 'sleek_bob', label: 'Sleek Chic Bob' },
-  { id: 'braided_locs', label: 'Braided Locs' },
-  { id: 'spiky_anime', label: 'Dynamic Spiky' },
-  { id: 'side_part_slick', label: 'Classic Side Part' },
-  { id: 'curly_wild', label: 'Voluminous Curls' },
-  { id: 'bald_clean', label: 'Clean Shaved' },
+  { id: 'buzzcut', label: 'Buzz Cut' },
+  { id: 'long_wavy', label: 'Long Wavy' },
+  { id: 'afro_fade', label: 'Afro' },
+  { id: 'sleek_bob', label: 'Bob' },
+  { id: 'braided_locs', label: 'Braids / Locs' },
+  { id: 'spiky_anime', label: 'Short Spiky' },
+  { id: 'side_part_slick', label: 'Side Part' },
+  { id: 'curly_wild', label: 'Curly' },
+  { id: 'bald_clean', label: 'Bald' },
 ];
 
 const HAIR_COLORS = [
-  { id: 'jet_black', label: 'Jet Black', hex: '#111827' },
-  { id: 'platinum_blonde', label: 'Platinum Blonde', hex: '#fef08a' },
-  { id: 'neon_cyan', label: 'Neon Cyan', hex: '#06b6d4' },
-  { id: 'electric_purple', label: 'Electric Violet', hex: '#a855f7' },
-  { id: 'auburn', label: 'Warm Auburn', hex: '#b45309' },
-  { id: 'silver_white', label: 'Silver White', hex: '#e2e8f0' },
-  { id: 'emerald_green', label: 'Emerald Green', hex: '#10b981' },
+  { id: 'jet_black', label: 'Black', hex: '#111827' },
+  { id: 'platinum_blonde', label: 'Blonde', hex: '#fef08a' },
+  { id: 'sky_blue', label: 'Blue', hex: '#38bdf8' },
+  { id: 'violet', label: 'Purple', hex: '#a855f7' },
+  { id: 'auburn', label: 'Auburn', hex: '#b45309' },
+  { id: 'silver_white', label: 'Gray / White', hex: '#e2e8f0' },
+  { id: 'emerald_green', label: 'Green', hex: '#10b981' },
 ];
 
 const CLOTHING_TOPS: { id: AvatarClothingTop; label: string }[] = [
-  { id: 'cyber_leather_jacket', label: 'Cyberpunk Leather Jacket' },
-  { id: 'executive_blazer', label: 'Executive Tailored Blazer' },
-  { id: 'techwear_hoodie', label: 'Tactical Techwear Hoodie' },
-  { id: 'nanotech_armor', label: 'Nanotech Powered Armor' },
-  { id: 'minimal_tshirt', label: 'Minimalist Premium Tee' },
-  { id: 'mystic_robe', label: 'Mystic Enchanted Robe' },
-  { id: 'flight_bomber', label: 'Retro Flight Bomber' },
+  { id: 'leather_jacket', label: 'Leather Jacket' },
+  { id: 'blazer', label: 'Blazer' },
+  { id: 'hoodie', label: 'Hoodie' },
+  { id: 'knit_sweater', label: 'Knit Sweater' },
+  { id: 'tshirt', label: 'T-Shirt' },
+  { id: 'robe', label: 'Long Robe' },
+  { id: 'bomber_jacket', label: 'Bomber Jacket' },
 ];
 
 const CLOTHING_BOTTOMS: { id: AvatarClothingBottom; label: string }[] = [
-  { id: 'tactical_cargo_pants', label: 'Tactical Cargo Pants' },
-  { id: 'tailored_trousers', label: 'Tailored Slim Trousers' },
-  { id: 'cyber_joggers', label: 'Cyber Utility Joggers' },
-  { id: 'reinforced_greaves', label: 'Reinforced Armor Greaves' },
-  { id: 'denim_jeans', label: 'Classic Dark Denim' },
-  { id: 'armored_skirt', label: 'Pleated Combat Skirt' },
+  { id: 'cargo_pants', label: 'Cargo Pants' },
+  { id: 'tailored_trousers', label: 'Slim Trousers' },
+  { id: 'joggers', label: 'Joggers' },
+  { id: 'shorts', label: 'Shorts' },
+  { id: 'denim_jeans', label: 'Dark Denim' },
+  { id: 'pleated_skirt', label: 'Pleated Skirt' },
 ];
 
 const SHOES: { id: AvatarShoes; label: string }[] = [
-  { id: 'cyber_high_top_sneakers', label: 'High-Top LED Sneakers' },
-  { id: 'tactical_combat_boots', label: 'Reinforced Combat Boots' },
-  { id: 'polished_oxfords', label: 'Polished Italian Oxfords' },
-  { id: 'hover_mag_kicks', label: 'Hover Magnetic Kicks' },
-  { id: 'sleek_runners', label: 'Aero Minimal Runners' },
+  { id: 'high_top_sneakers', label: 'High-Top Sneakers' },
+  { id: 'boots', label: 'Boots' },
+  { id: 'oxfords', label: 'Dress Shoes' },
+  { id: 'sandals', label: 'Sandals' },
+  { id: 'runners', label: 'Running Shoes' },
 ];
 
 const ACCESSORIES: { id: AvatarAccessory; label: string }[] = [
-  { id: 'none', label: 'None (Clean)' },
-  { id: 'holo_visor', label: 'Holographic Visor' },
-  { id: 'wireframe_glasses', label: 'Thin Wireframe Glasses' },
-  { id: 'studio_headset', label: 'Over-Ear Studio Headset' },
-  { id: 'cybernetic_mask', label: 'Cyber Tech Face Mask' },
-  { id: 'gold_chain_choker', label: 'Gold Link Chain' },
-  { id: 'neon_earring_cuff', label: 'Neon Ear Cuffs' },
-  { id: 'beret_cap', label: 'Modern Beret Cap' },
+  { id: 'none', label: 'None' },
+  { id: 'sunglasses', label: 'Sunglasses' },
+  { id: 'glasses', label: 'Glasses' },
+  { id: 'headphones', label: 'Headphones' },
+  { id: 'scarf', label: 'Scarf' },
+  { id: 'necklace', label: 'Necklace' },
+  { id: 'earrings', label: 'Earrings' },
+  { id: 'hat', label: 'Hat' },
 ];
 
 const BODY_TYPES: { id: AvatarBodyType; label: string }[] = [
+  { id: 'average', label: 'Average' },
   { id: 'athletic', label: 'Athletic' },
   { id: 'slender', label: 'Slender' },
-  { id: 'muscular', label: 'Muscular / Strong' },
-  { id: 'compact_chibi', label: 'Compact / Chibi Mascot' },
-  { id: 'cyber_cyborg', label: 'Cybernetic Cyborg' },
+  { id: 'muscular', label: 'Strong' },
+  { id: 'compact', label: 'Short / Compact' },
   { id: 'curvy', label: 'Curvy / Broad' },
 ];
 
@@ -135,16 +136,17 @@ const FRAMING_OPTIONS: { id: AvatarFraming; label: string; desc: string }[] = [
   { id: 'full_body', label: 'Full Figure', desc: 'Ideal for Game Character Sprites & Hero Mascots' },
 ];
 
-const AVATAR_STYLES = [
-  { id: 'illustrated_portrait', label: 'Illustrated Portrait', suffix: ', semi-realistic digital portrait illustration, warm dignified fine-art rendering, expressive hand-painted brushwork, soft natural lighting, clean character presence, like a premium devotional or editorial illustration' },
-  { id: 'painterly_cinematic', label: 'Painterly Cinematic', suffix: ', cinematic painterly portrait, dramatic chiaroscuro lighting, expressive brushstroke textures, oil-painting aesthetic, rich warm earth tones, high-contrast heroic composition, like concept art for a prestige film or AAA game' },
-  { id: 'motion_comic', label: 'Motion Comic', suffix: ', bold graphic novel comic book illustration, strong ink outline contours, flat color fills with halftone texture accents, dynamic sequential art composition, dramatic panel-ready framing, confident bold line weight' },
-  { id: 'watercolor', label: 'Watercolor Portrait', suffix: ', full-body watercolor portrait, fine art watercolor illustration, delicate paint washes, fluid pigments, textured cold-press cotton paper, expressive elegant contour lines, luminous artistic depth' },
-  { id: 'anime', label: 'Anime Hero Figure', suffix: ', vibrant modern anime character, crisp cel-shaded lines, dynamic expression, studio character portrait' },
-  { id: 'vector', label: 'Modern Flat Mascot', suffix: ', minimalist modern vector mascot character, rounded friendly curves, tech brand onboarding icon' },
-  { id: 'pixel', label: '16-Bit Pixel Art', suffix: ', retro 16-bit pixel art sprite portrait, nostalgic arcade game aesthetic, crisp pixels' },
-  { id: '3d_cute', label: '3D Animated Stylized', suffix: ', 3D animated character render style, smooth clay, expressive lighting, character bust portrait' },
-  { id: 'cyberpunk', label: 'Cyberpunk Operative', suffix: ', cyberpunk digital avatar, neon holographic highlights, futuristic visor, high tech aesthetic, 4k portrait' },
+export const AVATAR_STYLES: { id: AvatarStyleId; label: string; blurb: string; suffix: string }[] = [
+  { id: 'sketch', label: 'Hand-Drawn Sketch', blurb: 'Loose ink lines, a few flat colors', suffix: ', hand-drawn ink sketch illustration, confident marker line work, a few flat accent colors, simple friendly faces, paper background' },
+  { id: 'flat_portrait', label: 'Flat Portrait', blurb: 'Clean flat shapes, solid colors', suffix: ', flat 2D vector portrait illustration, solid color fills, simple clean outlines, no gradients, plain background' },
+  { id: 'line_art', label: 'Line Art', blurb: 'Black outlines on white, minimal', suffix: ', minimal black line art portrait, thin consistent outlines, white fills, no shading, editorial look' },
+  { id: 'watercolor', label: 'Watercolor', blurb: 'Soft paint washes on paper', suffix: ', watercolor portrait illustration, soft translucent paint washes, textured paper, gentle edges, light pencil outline' },
+  { id: 'comic_book', label: 'Comic Book', blurb: 'Bold ink outlines, flat color', suffix: ', graphic novel illustration, strong black ink outlines, flat bold color fills, light halftone shading, expressive face' },
+  { id: 'pixel', label: 'Pixel Art', blurb: 'Blocky pixels, old video game', suffix: ', 16-bit pixel art sprite portrait, clean pixel grid, limited palette, crisp pixels' },
+  { id: 'mascot', label: 'Friendly Mascot', blurb: 'Simple rounded character', suffix: ', simple friendly mascot character, rounded shapes, big smile, flat colors, brand onboarding icon' },
+  { id: '3d_cartoon', label: '3D Cartoon', blurb: 'Soft rounded 3D character', suffix: ', soft rounded 3D cartoon character, smooth matte surfaces, gentle studio lighting, pastel colors' },
+  { id: 'anime', label: 'Anime', blurb: 'Clean lines, cel shading', suffix: ', modern anime character portrait, crisp cel-shaded lines, expressive eyes, clean colors' },
+  { id: 'painted_portrait', label: 'Painted Portrait', blurb: 'Realistic painted face, warm light', suffix: ', semi-realistic painted portrait, visible brush strokes, warm natural light, calm dignified expression' },
 ];
 
 export const AvatarStudio: React.FC<AvatarStudioProps> = ({
@@ -160,9 +162,23 @@ export const AvatarStudio: React.FC<AvatarStudioProps> = ({
   canUndo,
   canRedo,
 }) => {
-  const [activeTab, setActiveTab] = useState<'customizer' | 'preset'>('customizer');
+  const [activeTab, setActiveTab] = useState<'customizer' | 'preset'>(project.avatarUrl ? 'customizer' : 'preset');
+  const [galleryFilter, setGalleryFilter] = useState<string>('All');
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const galleryStyles = ['All', ...Array.from(new Set(PREDEFINED_AVATARS.map((a) => a.tag)))];
+  const galleryList = PREDEFINED_AVATARS.filter((a) => galleryFilter === 'All' || a.tag === galleryFilter);
+  const galleryAvatar = galleryList[((galleryIndex % galleryList.length) + galleryList.length) % galleryList.length];
+  const stepGallery = (dir: number) => setGalleryIndex((i) => i + dir);
+  const useGalleryAvatar = (a: (typeof PREDEFINED_AVATARS)[number]) =>
+    onChange({
+      avatarMode: 'preset',
+      avatarUrl: a.imageUrl,
+      avatarStyle: a.styleId,
+      selectedVoice: a.voice,
+      dialogueText: a.defaultDialogue,
+    });
   const [customDescription, setCustomDescription] = useState(
-    project.avatarPrompt || 'A charismatic digital avatar companion with expressive eyes and confident demeanor'
+    project.avatarPrompt || 'A friendly guide with expressive eyes and a warm, confident smile'
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -213,7 +229,7 @@ export const AvatarStudio: React.FC<AvatarStudioProps> = ({
     const body = BODY_TYPES.find((b) => b.id === project.bodyType)?.label || 'athletic';
     const framing = FRAMING_OPTIONS.find((f) => f.id === project.framing)?.label || 'portrait';
 
-    const hairColorStr = (project.hairColor || 'electric_cyan').replace('_', ' ');
+    const hairColorStr = (project.hairColor || 'jet_black').replace('_', ' ');
     let prompt = `${framing} of a character with ${body} build, featuring ${hair} in ${hairColorStr} color. Wearing ${top}, paired with ${bottom} and ${shoes}.`;
     if (acc) {
       prompt += ` Accessorized with ${acc}.`;
@@ -378,6 +394,18 @@ export const AvatarStudio: React.FC<AvatarStudioProps> = ({
 
           <div className="inline-flex p-1 bg-slate-900 border border-slate-800 rounded-lg">
             <button
+              id="tab-avatar-preset"
+              type="button"
+              onClick={() => setActiveTab('preset')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                activeTab === 'preset'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              1. Pick a Starter
+            </button>
+            <button
               id="tab-avatar-customizer"
               type="button"
               onClick={() => setActiveTab('customizer')}
@@ -388,19 +416,7 @@ export const AvatarStudio: React.FC<AvatarStudioProps> = ({
               }`}
             >
               <Wand2 className="w-3.5 h-3.5 text-amber-300" />
-              Wardrobe &amp; Customizer
-            </button>
-            <button
-              id="tab-avatar-preset"
-              type="button"
-              onClick={() => setActiveTab('preset')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                activeTab === 'preset'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Quick Presets
+              2. Customize
             </button>
           </div>
         </div>
@@ -412,12 +428,17 @@ export const AvatarStudio: React.FC<AvatarStudioProps> = ({
           {/* Avatar figure thumbnail + details */}
           <div className="flex items-center gap-4">
             <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-950 border-2 border-indigo-400/60 shadow-lg shrink-0 group">
-              <img
-                src={project.avatarUrl}
+              {project.avatarUrl ? (<img
+                src={project.avatarUrl || undefined}
                 alt="Active Avatar Mascot"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
+              />) : null}
+              {!project.avatarUrl && (
+                <div className="absolute inset-0 flex items-center justify-center text-center text-[10px] leading-tight text-slate-400 px-1">
+                  No avatar yet. Pick a starter.
+                </div>
+              )}
               <div className="absolute bottom-0 inset-x-0 bg-slate-950/85 backdrop-blur-xs py-0.5 text-center text-[9px] font-mono text-indigo-300 uppercase">
                 {project.avatarPose} stage
               </div>
@@ -429,7 +450,7 @@ export const AvatarStudio: React.FC<AvatarStudioProps> = ({
                   {project.title || 'App'} Mascot
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
-                  {project.avatarStyle.toUpperCase()}
+                  {AVATAR_STYLES.find((st) => st.id === project.avatarStyle)?.label || project.avatarStyle}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700">
                   {(project.framing || 'portrait').replace('_', ' ')}
@@ -532,52 +553,102 @@ export const AvatarStudio: React.FC<AvatarStudioProps> = ({
         </div>
       </div>
 
-      {/* Preset Avatars View */}
-      {activeTab === 'preset' && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {PREDEFINED_AVATARS.map((avatar) => {
-              const isSelected = project.avatarUrl === avatar.imageUrl;
-              return (
-                <div
-                  key={avatar.id}
-                  id={`avatar-preset-${avatar.id}`}
-                  onClick={() => {
-                    onChange({
-                      avatarMode: 'preset',
-                      avatarUrl: avatar.imageUrl,
-                      selectedVoice: avatar.voice,
-                      dialogueText: avatar.defaultDialogue,
-                    });
-                  }}
-                  className={`group rounded-xl overflow-hidden cursor-pointer border p-3 flex flex-col items-center text-center transition-all ${
-                    isSelected
-                      ? 'border-indigo-500 bg-indigo-950/20 ring-2 ring-indigo-500/30'
-                      : 'border-slate-800 bg-slate-900/50 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="w-20 h-20 rounded-full overflow-hidden mb-2.5 relative border-2 border-slate-700 group-hover:border-indigo-400 transition-colors">
-                    <img
-                      src={avatar.imageUrl}
-                      alt={avatar.name}
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    {isSelected && (
-                      <div className="absolute inset-0 bg-indigo-600/30 flex items-center justify-center">
-                        <Check className="w-5 h-5 text-white" />
-                      </div>
-                    )}
-                  </div>
+      {/* Starter Gallery: flip through demo avatars, filter by art style */}
+      {activeTab === 'preset' && galleryAvatar && (
+        <div className="space-y-4" id="avatar-gallery">
+          <p className="text-xs text-slate-400">
+            These are demo avatars in five different art styles. Flip through them, pick one you like, then press
+            <span className="text-slate-200"> Customize</span> to change the look or generate your own in that style.
+          </p>
 
-                  <span className="text-xs font-bold text-slate-100">{avatar.name}</span>
-                  <span className="text-[10px] text-slate-400 mb-1">{avatar.role}</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-800 text-indigo-300 border border-slate-700">
-                    Voice: {avatar.voice}
-                  </span>
+          <div className="flex flex-wrap gap-1.5">
+            {galleryStyles.map((st) => (
+              <button
+                key={st}
+                type="button"
+                onClick={() => {
+                  setGalleryFilter(st);
+                  setGalleryIndex(0);
+                }}
+                className={`px-2.5 py-1 text-[11px] rounded-full border transition-colors ${
+                  galleryFilter === st
+                    ? 'bg-indigo-600 border-indigo-500 text-white'
+                    : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'
+                }`}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3 bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+            <button
+              type="button"
+              aria-label="Previous avatar"
+              onClick={() => stepGallery(-1)}
+              className="w-9 h-9 shrink-0 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-lg"
+            >
+              ‹
+            </button>
+
+            <div className="flex-1 flex flex-col sm:flex-row items-center gap-4">
+              <img
+                src={galleryAvatar.imageUrl}
+                alt={galleryAvatar.name}
+                className="w-44 h-44 rounded-2xl border-2 border-slate-700 object-cover bg-slate-800"
+              />
+              <div className="space-y-1.5 text-center sm:text-left">
+                <div className="text-[10px] uppercase tracking-wider text-indigo-300">{galleryAvatar.tag}</div>
+                <div className="text-lg font-bold text-slate-100">{galleryAvatar.name}</div>
+                <div className="text-xs text-slate-400">{galleryAvatar.role} · Voice: {galleryAvatar.voice}</div>
+                <p className="text-xs text-slate-300 italic">“{galleryAvatar.defaultDialogue}”</p>
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start pt-1">
+                  <button
+                    type="button"
+                    onClick={() => useGalleryAvatar(galleryAvatar)}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white"
+                  >
+                    {project.avatarUrl === galleryAvatar.imageUrl ? '✓ Selected' : 'Use this avatar'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      useGalleryAvatar(galleryAvatar);
+                      setActiveTab('customizer');
+                    }}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700"
+                  >
+                    Use &amp; Customize →
+                  </button>
                 </div>
-              );
-            })}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              aria-label="Next avatar"
+              onClick={() => stepGallery(1)}
+              className="w-9 h-9 shrink-0 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-lg"
+            >
+              ›
+            </button>
+          </div>
+
+          <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+            {galleryList.map((avatar, i) => (
+              <button
+                key={avatar.id}
+                id={`avatar-preset-${avatar.id}`}
+                type="button"
+                title={`${avatar.name} — ${avatar.tag}`}
+                onClick={() => setGalleryIndex(i)}
+                className={`rounded-lg overflow-hidden border-2 aspect-square ${
+                  avatar.id === galleryAvatar.id ? 'border-indigo-500' : 'border-slate-800 hover:border-slate-600'
+                }`}
+              >
+                <img src={avatar.imageUrl} alt={avatar.name} className="w-full h-full object-cover" />
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -597,7 +668,7 @@ export const AvatarStudio: React.FC<AvatarStudioProps> = ({
                 type="text"
                 value={customDescription}
                 onChange={(e) => setCustomDescription(e.target.value)}
-                placeholder="E.g. Friendly AI android guide with warm golden eyes and subtle cyber freckles..."
+                placeholder="E.g. Friendly guide with warm brown eyes, short curly hair and a calm smile..."
                 className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
@@ -757,6 +828,9 @@ export const AvatarStudio: React.FC<AvatarStudioProps> = ({
                     </option>
                   ))}
                 </select>
+                <p className="mt-1 text-[11px] text-slate-500">
+                  {AVATAR_STYLES.find((st) => st.id === project.avatarStyle)?.blurb}
+                </p>
               </div>
             </div>
 

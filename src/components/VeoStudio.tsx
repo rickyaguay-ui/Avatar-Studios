@@ -46,8 +46,8 @@ export const VeoStudio: React.FC<VeoStudioProps> = ({ project, onSaveAssetToProj
 
   // Suggested Prompts for App Intro & Cutscene
   const SUGGESTED_PROMPTS = [
-    'Cinematic slow-motion pan revealing an epic sci-fi city with neon hologram billboards',
-    'Dynamic camera orbiting character as digital particles swirl and assemble the app UI',
+    'Slow cinematic pan across a green valley at sunrise, soft golden light',
+    'Slow camera move around a friendly character as the app screen fades in behind them',
     'Fast-paced dramatic intro cutscene with atmospheric fog and lens flare lighting',
     'Calm meditative sunrise over minimalist architectural water pavilion, gentle ripple effects',
   ];
