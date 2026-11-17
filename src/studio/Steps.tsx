@@ -7,6 +7,7 @@ import { exportSpecs, pwaManifestSnippet, specsToText } from '../config/exportSp
 import { Frame } from './Frames';
 import { Button, Img, Panel } from './Media';
 import { useStudio } from './state';
+import { BackdropPanel, StarterAvatarsPanel } from './StarterPanels';
 import { usePlayer } from './usePlayer';
 import integrations from '../demo/bundles/integrations.json';
 
@@ -26,12 +27,14 @@ function useCurrent() {
   const avatar = s.avatars[s.format];
   const svg = useMemo(() => renderAvatar(avatar), [avatar]);
   const portrait = s.portrait ?? ex.portraits[s.host];
-  return { s, d, ex, avatar, svg, portrait };
+  // A chosen backdrop replaces the picture in the frame only. Script, timing and export text keep using `ex`.
+  const frameEx = s.backdrop ? { ...ex, backdrop: s.backdrop, video: undefined } : ex;
+  return { s, d, ex, frameEx, avatar, svg, portrait };
 }
 
 /* ---------------- 1. Format ---------------- */
 export function FormatStep() {
-  const { s, d, ex, svg, portrait } = useCurrent();
+  const { s, d, ex, frameEx, svg, portrait } = useCurrent();
   const cue = ex.cues[Math.min(1, ex.cues.length - 1)];
   return (
     <div className="grid lg:grid-cols-[320px_1fr] gap-6">
@@ -51,7 +54,7 @@ export function FormatStep() {
         <Button primary className="mt-4 w-full" onClick={() => d({ t: 'step', step: 'avatar' })}>Next: Avatar</Button>
       </Panel>
       <div className="flex justify-center items-start p-4 rounded-xl bg-ink-900 border border-ink-700 min-h-[400px]">
-        <Frame ex={ex} cue={cue} avatarSvg={svg} portrait={portrait} playing={false} showSafe={false} />
+        <Frame ex={frameEx} cue={cue} avatarSvg={svg} portrait={portrait} playing={false} showSafe={false} />
       </div>
     </div>
   );
@@ -138,8 +141,10 @@ export function AvatarStep() {
             <span className="text-xs text-ink-400">{live ? 'Calls Gemini through the server.' : 'Demo mode: builder is disabled and shows the curated set.'}</span>
           </div>
           {msg && <p role="alert" className="text-sm text-warn mt-2">{msg}</p>}
-          {s.portrait && <div className="mt-3"><Img src={s.portrait} alt="Generated portrait" className="h-40 rounded" /></div>}
+          {s.portrait && <div className="mt-3"><Img src={s.portrait} alt="Selected portrait" className="h-40 rounded" /></div>}
         </Panel>
+
+        <StarterAvatarsPanel />
       </div>
       <Panel title="Preview" className="self-start">
         <div className="w-64 h-64 mx-auto rounded-xl overflow-hidden bg-ink-800" aria-label="Avatar preview" dangerouslySetInnerHTML={{ __html: svg }} />
@@ -194,13 +199,13 @@ export function VoiceStep() {
 
 /* ---------------- 4. Preview ---------------- */
 export function PreviewStep() {
-  const { s, d, ex, svg, portrait } = useCurrent();
+  const { s, d, ex, frameEx, svg, portrait } = useCurrent();
   const p = usePlayer(ex, s.host);
   const [safe, setSafe] = useState(true);
   return (
     <div className="grid lg:grid-cols-[1fr_320px] gap-6">
       <div className="flex flex-col items-center gap-4 p-4 rounded-xl bg-ink-900 border border-ink-700">
-        <Frame ex={ex} cue={p.cue} avatarSvg={svg} portrait={portrait} playing={p.playing} showSafe={safe && ex.id === 'tiktok'}
+        <Frame ex={frameEx} cue={p.cue} avatarSvg={svg} portrait={portrait} playing={p.playing} showSafe={safe && ex.id === 'tiktok'}
           onStep={p.step} onCue={(i) => i >= 0 && p.seek(ex.cues[i].at)} />
         <div className="w-full max-w-xl rounded-lg bg-black/60 border border-ink-700 px-4 py-3 text-center text-sm text-ink-50 min-h-[3.5rem]" aria-live="polite" aria-label="Captions">
           {p.cue.voiceover || <span className="text-ink-400">(no narration)</span>}
@@ -214,6 +219,8 @@ export function PreviewStep() {
         <input type="range" aria-label="Timeline" min={0} max={ex.durationSec} step={0.1} value={p.t} onChange={(e) => p.seek(Number(e.target.value))} className="w-full max-w-xl accent-gold-400" />
         {p.notice && <p role="alert" className="text-sm text-warn">{p.notice}</p>}
       </div>
+      <div className="flex flex-col gap-6">
+      <BackdropPanel />
       <Panel title="Script">
         <ol className="flex flex-col gap-2 text-sm">
           {ex.cues.map((c, i) => (
@@ -228,6 +235,7 @@ export function PreviewStep() {
         </ol>
         <Button primary className="w-full mt-4" onClick={() => d({ t: 'step', step: 'export' })}>Next: Export</Button>
       </Panel>
+      </div>
     </div>
   );
 }
