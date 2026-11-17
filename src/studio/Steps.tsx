@@ -7,6 +7,8 @@ import { exportSpecs, pwaManifestSnippet, specsToText } from '../config/exportSp
 import { Frame } from './Frames';
 import { Button, Img, Panel } from './Media';
 import { useStudio } from './state';
+import { BackdropPanel, StarterAvatarsPanel } from './StarterPanels';
+import { ELEVEN_VOICES } from './voices';
 import { usePlayer } from './usePlayer';
 import integrations from '../demo/bundles/integrations.json';
 
@@ -26,12 +28,14 @@ function useCurrent() {
   const avatar = s.avatars[s.format];
   const svg = useMemo(() => renderAvatar(avatar), [avatar]);
   const portrait = s.portrait ?? ex.portraits[s.host];
-  return { s, d, ex, avatar, svg, portrait };
+  // A chosen backdrop replaces the picture in the frame only. Script, timing and export text keep using `ex`.
+  const frameEx = s.backdrop ? { ...ex, backdrop: s.backdrop, video: undefined } : ex;
+  return { s, d, ex, frameEx, avatar, svg, portrait };
 }
 
 /* ---------------- 1. Format ---------------- */
 export function FormatStep() {
-  const { s, d, ex, svg, portrait } = useCurrent();
+  const { s, d, ex, frameEx, svg, portrait } = useCurrent();
   const cue = ex.cues[Math.min(1, ex.cues.length - 1)];
   return (
     <div className="grid lg:grid-cols-[320px_1fr] gap-6">
@@ -51,7 +55,7 @@ export function FormatStep() {
         <Button primary className="mt-4 w-full" onClick={() => d({ t: 'step', step: 'avatar' })}>Next: Avatar</Button>
       </Panel>
       <div className="flex justify-center items-start p-4 rounded-xl bg-ink-900 border border-ink-700 min-h-[400px]">
-        <Frame ex={ex} cue={cue} avatarSvg={svg} portrait={portrait} playing={false} showSafe={false} />
+        <Frame ex={frameEx} cue={cue} avatarSvg={svg} portrait={portrait} playing={false} showSafe={false} />
       </div>
     </div>
   );
@@ -83,8 +87,7 @@ export function AvatarStep() {
   };
 
   return (
-    <div className="grid lg:grid-cols-[1fr_300px] gap-6">
-      <div className="flex flex-col gap-6">
+    <div className="max-w-3xl mx-auto flex flex-col gap-6">
         <Panel title="Avatar customizer (DiceBear Open Peeps)">
           <div className="grid sm:grid-cols-2 gap-3">
             {FIELDS.map((f) => {
@@ -112,7 +115,10 @@ export function AvatarStep() {
               );
             })}
           </div>
-          <div className="text-[11px] text-ink-400 mt-3">Seed <code className="text-gold-300">{avatar.seed}</code>. Same seed and options always render the same SVG.</div>
+          <div className="mt-5 flex flex-col items-center gap-2">
+            <div id="dicebear-preview" className="w-64 h-64 rounded-xl overflow-hidden bg-ink-800" aria-label="Avatar preview" aria-live="polite" dangerouslySetInnerHTML={{ __html: svg }} />
+            <div className="text-[11px] text-ink-400">Updates as you change the options. Seed <code className="text-gold-300">{avatar.seed}</code>. Same seed and options always render the same SVG.</div>
+          </div>
         </Panel>
 
         <Panel title={live ? 'AI portrait builder (Gemini)' : 'Portraits (curated set)'}>
@@ -138,13 +144,12 @@ export function AvatarStep() {
             <span className="text-xs text-ink-400">{live ? 'Calls Gemini through the server.' : 'Demo mode: builder is disabled and shows the curated set.'}</span>
           </div>
           {msg && <p role="alert" className="text-sm text-warn mt-2">{msg}</p>}
-          {s.portrait && <div className="mt-3"><Img src={s.portrait} alt="Generated portrait" className="h-40 rounded" /></div>}
+          {s.portrait && <div className="mt-3"><Img src={s.portrait} alt="Selected portrait" className="h-40 rounded" /></div>}
         </Panel>
-      </div>
-      <Panel title="Preview" className="self-start">
-        <div className="w-64 h-64 mx-auto rounded-xl overflow-hidden bg-ink-800" aria-label="Avatar preview" dangerouslySetInnerHTML={{ __html: svg }} />
-        <Button primary className="w-full mt-4" onClick={() => d({ t: 'step', step: 'voice' })}>Next: Voice</Button>
-      </Panel>
+
+        <StarterAvatarsPanel />
+
+        <Button primary className="self-start" onClick={() => d({ t: 'step', step: 'voice' })}>Next: Voice</Button>
     </div>
   );
 }
@@ -156,10 +161,20 @@ export function VoiceStep() {
   const [busy, setBusy] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
+  const demo = APP_MODE === 'demo';
+  // The picked ElevenLabs voice: an extra voice (voiceId) or the base voice of the selected host.
+  const picked = ELEVEN_VOICES.find((v) => (s.voiceId ? v.id === s.voiceId : v.host === s.host));
+  const exampleScript = ex.cues.map((c) => c.voiceover).filter(Boolean).slice(0, 2).join(' ');
+  // The script box. It starts as the picked voice's announcement and resets when you pick another voice.
+  const [script, setScript] = useState(picked?.intro ?? '');
+  useEffect(() => { setScript(picked?.intro ?? ''); }, [picked?.id]);
+
   const sample = async () => {
-    audio?.pause(); setMsg(null); setBusy(true);
-    const text = ex.cues.map((c) => c.voiceover).filter(Boolean).slice(0, 2).join(' ');
-    const r = await provider.speak({ format: s.format, host: s.host, text });
+    audio?.pause(); setMsg(null);
+    const text = script.trim();
+    if (!demo && !text) { setMsg('Type something for the voice to say.'); return; }
+    setBusy(true);
+    const r = await provider.speak({ format: s.format, host: s.host, text, voiceId: s.voiceId ?? undefined });
     setBusy(false);
     if (!r.ok) { setMsg(r.message); return; }
     const a = new Audio(r.data.audioUrl);
@@ -174,16 +189,49 @@ export function VoiceStep() {
       <Panel title="Choose the narrator">
         <div className="grid sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Voice">
           {(Object.keys(HOSTS) as HostId[]).map((h) => (
-            <button key={h} role="radio" aria-checked={s.host === h} onClick={() => d({ t: 'host', host: h })}
-              className={`text-left rounded-lg border p-4 ${s.host === h ? 'border-gold-400 bg-ink-800' : 'border-ink-700 hover:border-ink-600'}`}>
+            <button key={h} role="radio" aria-checked={s.host === h && !s.voiceId} onClick={() => d({ t: 'host', host: h })}
+              className={`text-left rounded-lg border p-4 ${s.host === h && !s.voiceId ? 'border-gold-400 bg-ink-800' : 'border-ink-700 hover:border-ink-600'}`}>
               <div className="font-display text-lg text-ink-50">{HOSTS[h].name}</div>
               <div className="text-xs text-ink-400 mt-1">{HOSTS[h].blurb}</div>
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-3 mt-4">
-          <Button onClick={sample} disabled={busy}>{busy ? 'Working...' : `Play ${HOSTS[s.host].name}'s ${ex.label} clip`}</Button>
-          <span className="text-xs text-ink-400">{APP_MODE === 'demo' ? 'Pre-baked clip. No network call.' : 'Generated with ElevenLabs through the server.'}</span>
+      </Panel>
+      <Panel title="ElevenLabs voices">
+        <p className="text-xs text-ink-400 mb-3">
+          Shown under ElevenLabs' own names. Sarah and Chris are the voices Mesa and Reed were built from.
+          {demo && ' Demo mode only has pre-recorded clips for those two. Alice and Eric need Live mode.'}
+        </p>
+        <div className="grid sm:grid-cols-2 gap-3" role="radiogroup" aria-label="ElevenLabs voice">
+          {ELEVEN_VOICES.map((v) => {
+            const on = picked?.id === v.id;
+            const locked = demo && !v.host;
+            return (
+              <button key={v.id} role="radio" aria-checked={on} disabled={locked} data-voice={v.name}
+                onClick={() => (v.host ? d({ t: 'host', host: v.host }) : d({ t: 'voice', id: v.id }))}
+                className={`text-left rounded-lg border p-4 disabled:opacity-40 disabled:cursor-not-allowed ${on ? 'border-gold-400 bg-ink-800' : 'border-ink-700 hover:border-ink-600'}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-display text-lg text-ink-50">{v.name}</span>
+                  {v.host && <span className="text-[10px] rounded-full bg-ink-700 text-gold-300 px-2 py-0.5">{HOSTS[v.host].name}'s voice</span>}
+                </div>
+                <div className="text-xs text-ink-200 mt-1">{v.tagline}</div>
+                <div className="text-[11px] text-ink-400 mt-1">{v.gender}, {v.age}, {v.accent}{locked ? ' · Live mode only' : ''}</div>
+              </button>
+            );
+          })}
+        </div>
+      </Panel>
+      <Panel title="Script">
+        <label className="flex flex-col gap-1 text-xs text-ink-400">
+          What {picked ? picked.name : 'the voice'} says
+          <textarea id="voice-script" value={script} onChange={(e) => setScript(e.target.value)} maxLength={500} rows={4} disabled={demo}
+            placeholder="Type what you want the voice to say."
+            className="bg-ink-800 border border-ink-600 rounded px-3 py-2 text-sm text-ink-50 disabled:opacity-50" />
+        </label>
+        <div className="flex flex-wrap items-center gap-3 mt-3">
+          <Button onClick={sample} disabled={busy}>{busy ? 'Working...' : `Play ${picked ? picked.name : HOSTS[s.host].name}'s ${demo ? ex.label + ' clip' : 'script'}`}</Button>
+          {!demo && <Button onClick={() => setScript(exampleScript)}>Use the example narration</Button>}
+          <span className="text-xs text-ink-400">{demo ? 'Demo mode plays the pre-recorded clip. Typing a script needs Live mode.' : `${script.length} / 500 characters`}</span>
         </div>
         {msg && <p role="alert" className="text-sm text-warn mt-2">{msg}</p>}
       </Panel>
@@ -194,13 +242,13 @@ export function VoiceStep() {
 
 /* ---------------- 4. Preview ---------------- */
 export function PreviewStep() {
-  const { s, d, ex, svg, portrait } = useCurrent();
+  const { s, d, ex, frameEx, svg, portrait } = useCurrent();
   const p = usePlayer(ex, s.host);
   const [safe, setSafe] = useState(true);
   return (
     <div className="grid lg:grid-cols-[1fr_320px] gap-6">
       <div className="flex flex-col items-center gap-4 p-4 rounded-xl bg-ink-900 border border-ink-700">
-        <Frame ex={ex} cue={p.cue} avatarSvg={svg} portrait={portrait} playing={p.playing} showSafe={safe && ex.id === 'tiktok'}
+        <Frame ex={frameEx} cue={p.cue} avatarSvg={svg} portrait={portrait} playing={p.playing} showSafe={safe && ex.id === 'tiktok'}
           onStep={p.step} onCue={(i) => i >= 0 && p.seek(ex.cues[i].at)} />
         <div className="w-full max-w-xl rounded-lg bg-black/60 border border-ink-700 px-4 py-3 text-center text-sm text-ink-50 min-h-[3.5rem]" aria-live="polite" aria-label="Captions">
           {p.cue.voiceover || <span className="text-ink-400">(no narration)</span>}
@@ -214,6 +262,8 @@ export function PreviewStep() {
         <input type="range" aria-label="Timeline" min={0} max={ex.durationSec} step={0.1} value={p.t} onChange={(e) => p.seek(Number(e.target.value))} className="w-full max-w-xl accent-gold-400" />
         {p.notice && <p role="alert" className="text-sm text-warn">{p.notice}</p>}
       </div>
+      <div className="flex flex-col gap-6">
+      <BackdropPanel />
       <Panel title="Script">
         <ol className="flex flex-col gap-2 text-sm">
           {ex.cues.map((c, i) => (
@@ -228,6 +278,7 @@ export function PreviewStep() {
         </ol>
         <Button primary className="w-full mt-4" onClick={() => d({ t: 'step', step: 'export' })}>Next: Export</Button>
       </Panel>
+      </div>
     </div>
   );
 }
