@@ -34,8 +34,9 @@ export const liveProvider: Provider = {
     const res = await post<{ imageUrl: string }>('/api/generate-image', { prompt, aspectRatio: '9:16' }, 'Gemini');
     return res;
   },
-  async speak({ format, host, text }) {
-    const res = await post<{ audioUrl: string }>('/api/elevenlabs-speech', { text, characterName: host === 'mesa' ? 'Mesa' : 'Reed' }, 'ElevenLabs');
+  async speak({ format, host, text, voiceId }) {
+    // voiceId (an ElevenLabs voice picked in the Voice step) wins; otherwise the host's voice from .env is used.
+    const res = await post<{ audioUrl: string }>('/api/elevenlabs-speech', { text, characterName: host === 'mesa' ? 'Mesa' : 'Reed', ...(voiceId ? { voiceId } : {}) }, 'ElevenLabs');
     if (res.ok) return { ok: true, data: { audioUrl: res.data.audioUrl } };
     void format;
     return res;

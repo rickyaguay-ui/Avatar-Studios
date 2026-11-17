@@ -5,7 +5,7 @@ import { liveProvider } from './liveProvider';
 export interface PortraitRequest {
   hairstyle: string; clothing: string; bodyType: string; framing: string; artStyle: string; host: HostId;
 }
-export interface SpeakRequest { format: FormatId; host: HostId; text: string }
+export interface SpeakRequest { format: FormatId; host: HostId; text: string; voiceId?: string }
 export type IntegrationStatus = Record<IntegrationId, boolean>;
 
 /** Every screen talks to this interface and never to fetch directly. */
