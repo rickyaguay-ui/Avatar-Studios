@@ -1,4 +1,4 @@
-import type { Provider } from './provider';
+import type { Provider, ImageResult } from './provider';
 import type { Result } from '../types';
 import { getExample } from './examples';
 import { neutralExample } from '../live/neutral';
@@ -58,6 +58,14 @@ export const liveProvider: Provider = {
   },
   async generateBackdrop(prompt) {
     return post<{ imageUrl: string }>('/api/generate-backdrop', { prompt }, 'Image generation');
+  },
+  async generateImage({ kind, prompt, seed, width, height }) {
+    return kind === 'scene'
+      ? post<ImageResult>('/api/generate-backdrop', { prompt, seed, width, height }, 'Image generation')
+      : post<ImageResult>('/api/generate-image', { prompt, seed, width, height, provider: 'cloudflare' }, 'Image generation');
+  },
+  async editImage({ prompt, image, seed, width, height }) {
+    return post<ImageResult>('/api/edit-image', { prompt, image, seed, width, height }, 'Image editing');
   },
   async speak({ format, host, text, voiceId }) {
     // voiceId (an ElevenLabs voice picked in the Voice step) wins; otherwise the host's voice from .env is used.

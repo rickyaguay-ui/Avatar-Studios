@@ -4,10 +4,13 @@ import { Button, Img, Panel } from '../studio/Media';
 import { useStudio } from '../studio/state';
 import { STARTER_BACKDROPS } from '../studio/starterAssets';
 import { useDictation } from './dictation';
-import { SCENE_CHIPS, buildScenePrompt, cropToWidescreen } from './scene';
+import { ImageEditor } from './ImageEditor';
+import { generateFirst, type ImageApi } from './imageActions';
+import { newSeed, recordFromText } from './promptRecord';
+import { SCENE_CHIPS, cropToWidescreen } from './scene';
 
-/** Live-mode backdrop panel: describe a scene (typed or spoken) and generate it with Cloudflare FLUX.
- *  The preloaded backdrops stay below as a fallback. Used in the Format, Avatar and Preview steps. */
+/** Live-mode backdrop panel: describe a scene (typed or spoken), generate it, then edit it with the prompt fields,
+ *  the Edit button and the refiners. The preloaded backdrops stay below as a fallback. Used in Format, Avatar and Preview. */
 export function LiveBackdropPanel() {
   const { s, d } = useStudio();
   const [text, setText] = useState('');
@@ -19,17 +22,12 @@ export function LiveBackdropPanel() {
   const generate = async () => {
     const scene = text.trim();
     if (!scene) { setMsg('Describe a scene first, or pick one of the quick scenes.'); return; }
-    if (!provider.generateBackdrop) { setMsg('Scene generation is not available here.'); return; }
+    if (!provider.generateImage) { setMsg('Scene generation is not available here.'); return; }
     setBusy(true); setMsg(null);
-    const r = await provider.generateBackdrop(buildScenePrompt(scene));
-    if (!r.ok) { setBusy(false); setMsg(r.message); return; }
-    try {
-      const wide = await cropToWidescreen(r.data.imageUrl);
-      d({ t: 'backdrop', url: wide, prompt: scene });
-    } catch (e) {
-      setMsg(e instanceof Error ? e.message : 'Could not prepare the scene');
-    }
+    const r = await generateFirst(provider as unknown as ImageApi, 'scene', recordFromText('scene', scene, newSeed()), cropToWidescreen);
     setBusy(false);
+    if (!r.ok) { setMsg(r.message); return; }
+    d({ t: 'imgGen', kind: 'scene', version: { ...r.version, id: 0 } });
   };
 
   return (
@@ -54,20 +52,17 @@ export function LiveBackdropPanel() {
         ))}
       </div>
       <div className="flex items-center gap-3 mt-3">
-        <Button primary disabled={busy} onClick={generate}>{busy ? 'Generating...' : 'Generate scene'}</Button>
+        <Button primary disabled={busy} onClick={generate}>{busy ? 'Generating...' : s.images.scene ? 'Generate a new scene' : 'Generate scene'}</Button>
         <span className="text-xs text-ink-400">Widescreen, takes a few seconds.</span>
       </div>
       {msg && <p role="alert" className="text-sm text-warn mt-2">{msg}</p>}
 
+      {s.images.scene && <div className="mt-4"><ImageEditor kind="scene" /></div>}
       {ai && s.backdrop && (
-        <div className="mt-4 flex flex-col gap-2">
-          <p className="text-xs text-gold-300">AI scene in use: {s.backdropPrompt}</p>
-          <img src={s.backdrop} alt="Your generated scene" className="w-full rounded-md border border-ink-700 aspect-video object-cover" />
-          <div className="flex flex-wrap gap-2">
-            <a href={s.backdrop} download="avatar-studios-scene.jpg" className="px-4 py-2 rounded-md text-sm font-semibold bg-ink-700 text-ink-50 hover:bg-ink-600 border border-ink-600">Download scene</a>
-            <Button onClick={() => d({ t: 'backdrop', url: null })}>Remove AI scene</Button>
-          </div>
-        </div>
+        <p className="text-xs text-gold-300 mt-2">AI scene in use: {s.backdropPrompt}</p>
+      )}
+      {ai && s.backdrop && (
+        <a href={s.backdrop} download="avatar-studios-scene.jpg" className="inline-block mt-2 px-4 py-2 rounded-md text-sm font-semibold bg-ink-700 text-ink-50 hover:bg-ink-600 border border-ink-600">Download scene</a>
       )}
 
       <details className="mt-4" open={!ai}>

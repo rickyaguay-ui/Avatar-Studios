@@ -44,17 +44,3 @@ export const PRESETS: Record<'mesa' | 'reed', PortraitForm> = {
   reed: { subject: 'man', age: '40s', skin: 'tan skin', hair: 'short salt-and-pepper hair', build: 'stocky build', expression: 'direct and honest look',
     wardrobe: 'a flannel shirt', setting: 'a woodworking shop', lighting: 'warm golden-hour light', framing: 'head and shoulders', style: 'photorealistic photograph' },
 };
-
-const pronoun = (subject: string) => (subject === 'woman' ? 'her' : subject === 'man' ? 'his' : 'their');
-
-/** Assembles the picks (and optional free text) into the prompt sent to the image model. */
-export function buildPortraitPrompt(f: PortraitForm, extra: string, onlyMine: boolean): string {
-  const tail = 'Synthetic person, no text, no logos.';
-  const free = extra.trim();
-  if (onlyMine && free) return `${free} ${tail}`;
-  const parts = [
-    `${f.style} of a fictional ${f.subject} in ${pronoun(f.subject)} ${f.age}`,
-    f.skin, f.hair, f.build, f.expression, `wearing ${f.wardrobe}`, `in ${f.setting}`, f.lighting, f.framing,
-  ];
-  return `${parts.join(', ')}.${free ? ` ${free.replace(/\s+$/, '')}${/[.!?]$/.test(free) ? '' : '.'}` : ''} ${tail}`;
-}

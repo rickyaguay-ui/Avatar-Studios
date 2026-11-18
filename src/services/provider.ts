@@ -6,6 +6,9 @@ export interface PortraitRequest {
   hairstyle: string; clothing: string; bodyType: string; framing: string; artStyle: string; host: HostId;
   prompt?: string;   // Live mode: the fully assembled prompt (overrides the fields above)
 }
+export interface ImageResult { imageUrl: string; model?: string; width?: number; height?: number; seedHonored?: boolean }
+export interface GenerateImageRequest { kind: 'portrait' | 'scene'; prompt: string; seed: number; width: number; height: number }
+export interface EditImageRequest { prompt: string; image: string; seed: number; width: number; height: number }
 export interface SpeakRequest { format: FormatId; host: HostId; text: string; voiceId?: string }
 export type IntegrationStatus = Record<IntegrationId, boolean>;
 
@@ -17,6 +20,10 @@ export interface Provider {
   generatePortrait(req: PortraitRequest): Promise<Result<{ imageUrl: string }>>;
   /** Live mode only: an AI backdrop/scene from a prompt. Demo has none. */
   generateBackdrop?(prompt: string): Promise<Result<{ imageUrl: string }>>;
+  /** Live mode only: a seeded image from the structured prompt (portrait or scene). */
+  generateImage?(req: GenerateImageRequest): Promise<Result<ImageResult>>;
+  /** Live mode only: true image editing from an instruction (reference image in, edited image out). */
+  editImage?(req: EditImageRequest): Promise<Result<ImageResult>>;
   /** Returns an audio URL for the narration. Demo: the committed clip. Live: ElevenLabs via the server. */
   speak(req: SpeakRequest): Promise<Result<{ audioUrl: string }>>;
 }

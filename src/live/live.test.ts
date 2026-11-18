@@ -1,26 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BLANKS, DEFAULT_FORM, PRESETS, buildPortraitPrompt } from './portraitOptions';
+import { BLANKS, PRESETS } from './portraitOptions';
 import { neutralExample, userExample } from './neutral';
 import { GUIDE, WELCOME } from './guide';
 import { LIVE_INTEGRATIONS } from './integrations';
 import type { FormatExample } from '../types';
 
 const base = { id: 'tiktok', label: 'TikTok', brand: 'X', durationSec: 20, cues: [], avatar: { seed: 's', options: {} }, portraits: { mesa: '', reed: '' }, backdrop: '', voices: { mesa: '', reed: '' } } as unknown as FormatExample;
-
-test('picks and free text both shape the prompt', () => {
-  const p = buildPortraitPrompt(DEFAULT_FORM, 'a red scarf', false);
-  assert.match(p, /photorealistic photograph of a fictional woman/);
-  assert.match(p, /light brown skin/);
-  assert.match(p, /a red scarf\./);
-  assert.match(p, /Synthetic person, no text, no logos\.$/);
-});
-
-test('"use only my words" ignores the picks', () => {
-  const p = buildPortraitPrompt(DEFAULT_FORM, 'an old sailor with a grey beard', true);
-  assert.ok(p.startsWith('an old sailor with a grey beard'));
-  assert.doesNotMatch(p, /fictional woman/);
-});
 
 test('every preset value is an available option', () => {
   for (const preset of Object.values(PRESETS)) {
@@ -42,13 +28,7 @@ test('no Gemini or Hedra wording in anything Live mode shows', () => {
   assert.deepEqual(LIVE_INTEGRATIONS.map((i) => i.id), ['cloudflare', 'elevenlabs']);
 });
 
-import { SCENE_CHIPS, buildScenePrompt, widescreenCrop } from './scene';
-
-test('scene prompt is a wide, empty, people-free backdrop prompt', () => {
-  const p = buildScenePrompt('  a sunlit greenhouse.  ');
-  assert.match(p, /^Wide cinematic background scene: a sunlit greenhouse\./);
-  assert.match(p, /No people, no text, no logos\.$/);
-});
+import { SCENE_CHIPS, widescreenCrop } from './scene';
 
 test('quick scene chips are unique and non-empty', () => {
   assert.ok(SCENE_CHIPS.length >= 6);

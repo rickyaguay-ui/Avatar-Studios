@@ -8,7 +8,11 @@ import { LiveBackdropPanel } from './LiveBackdrop';
 import { SquarePicker } from './NarratorPanel';
 import { FIELDS, HOSTS, useCurrent } from '../studio/Steps';
 import { useDictation } from './dictation';
-import { BLANKS, DEFAULT_FORM, PRESETS, buildPortraitPrompt, type BlankDef, type PortraitForm } from './portraitOptions';
+import { BLANKS, DEFAULT_FORM, PRESETS, type BlankDef, type PortraitForm } from './portraitOptions';
+import { ImageEditor } from './ImageEditor';
+import { generateFirst, type ImageApi } from './imageActions';
+import { assemblePrompt, newSeed, recordFromPicks } from './promptRecord';
+import { cropToWidescreen } from './scene';
 
 const OTHER = '__other__';
 
@@ -41,18 +45,18 @@ export function LiveAvatarStep() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const dict = useDictation((t) => setExtra((p) => ((p.trim() ? p.trimEnd() + ' ' : '') + t).slice(0, 600)));
-  const prompt = buildPortraitPrompt(form, extra, onlyMine);
+  const prompt = assemblePrompt('portrait', recordFromPicks(form, extra, onlyMine, 0));
   const set = (k: keyof PortraitForm) => (v: string) => setForm((f) => ({ ...f, [k]: v }));
   const bg = s.backdrop ? { backgroundImage: `url(${s.backdrop})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined;
 
   const generate = async () => {
     if (onlyMine && !extra.trim()) { setMsg('Type or dictate your description first.'); return; }
     setBusy(true); setMsg(null);
-    const r = await provider.generatePortrait({
-      host: s.host, hairstyle: form.hair, clothing: form.wardrobe, bodyType: form.build, framing: form.framing, artStyle: form.style, prompt,
-    });
+    const record = recordFromPicks(form, extra, onlyMine, newSeed());
+    const r = await generateFirst(provider as unknown as ImageApi, 'portrait', record, cropToWidescreen);
     setBusy(false);
-    if (r.ok) d({ t: 'portrait', url: r.data.imageUrl }); else setMsg(r.message);
+    if (!r.ok) { setMsg(r.message); return; }
+    d({ t: 'imgGen', kind: 'portrait', version: { ...r.version, id: 0 } });
   };
 
   return (
@@ -136,15 +140,20 @@ export function LiveAvatarStep() {
         </Panel>
 
         <Panel title="Your portrait">
-          {s.portrait ? (
+          {s.images.portrait ? (
+            <div className="flex flex-col gap-3">
+              <ImageEditor kind="portrait" />
+              {s.portrait && <Button className="self-start" onClick={() => d({ t: 'portrait', url: null })}>Remove portrait (use the customizer avatar)</Button>}
+            </div>
+          ) : s.portrait ? (
             <div className="flex flex-col items-start gap-3">
-              <Img src={s.portrait} alt="Your generated portrait" className="w-full max-w-sm rounded-lg border border-ink-700" />
-              <Button onClick={() => d({ t: 'portrait', url: null })}>Remove portrait (use the customizer avatar)</Button>
+              <Img src={s.portrait} alt="Your chosen avatar" className="w-full max-w-sm rounded-lg border border-ink-700" />
+              <Button onClick={() => d({ t: 'portrait', url: null })}>Remove this avatar</Button>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center text-center gap-2 min-h-[16rem] rounded-lg border border-dashed border-ink-600 text-ink-400 text-sm p-6">
               <span>No portrait yet.</span>
-              <span className="text-xs">Fill in the blanks and press Generate portrait, or pick a starter avatar below. Until then the Preview uses your customizer avatar.</span>
+              <span className="text-xs">Fill in the blanks and press Generate portrait, or pick a starter avatar below. Until you build an avatar the narrator circle stays empty.</span>
             </div>
           )}
         </Panel>

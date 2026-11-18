@@ -13,12 +13,6 @@ export const SCENE_CHIPS: SceneChip[] = [
   { label: 'Bright classroom', text: 'a bright empty classroom with a chalkboard and wooden desks' },
 ];
 
-/** The description becomes a backdrop prompt: wide, empty foreground, no people or text. */
-export function buildScenePrompt(text: string): string {
-  const scene = text.trim().replace(/[.\s]+$/, '');
-  return `Wide cinematic background scene: ${scene}. Empty foreground with open space in the center for a person to stand in front, soft depth of field, photorealistic. No people, no text, no logos.`;
-}
-
 /** Crop box for a centered 16:9 window inside a w x h image. */
 export function widescreenCrop(w: number, h: number): { sx: number; sy: number; sw: number; sh: number } {
   const target = 16 / 9;
