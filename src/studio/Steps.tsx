@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormatId, HostId, IntegrationInfo } from '../types';
 import { provider, APP_MODE } from '../services/provider';
 import { FORMAT_ORDER } from '../services/examples';
@@ -74,7 +74,7 @@ const FIELDS: { field: Parameters<typeof setOption>[1]; label: string; list: str
 
 export function AvatarStep() {
   const { s, d, ex, avatar, svg } = useCurrent();
-  const [form, setForm] = useState({ hairstyle: 'short dark', clothing: 'canvas work jacket', bodyType: 'average', framing: 'bust', artStyle: 'soft illustration' });
+  const [form, setForm] = useState({ hairstyle: 'short dark', clothing: 'canvas work jacket', bodyType: 'average', framing: 'bust', artStyle: 'photorealistic photo' });
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const live = APP_MODE === 'live';
@@ -121,7 +121,7 @@ export function AvatarStep() {
           </div>
         </Panel>
 
-        <Panel title={live ? 'AI portrait builder (Gemini)' : 'Portraits (curated set)'}>
+        <Panel title={live ? 'AI portrait builder' : 'Portraits (curated set)'}>
           <div className="grid grid-cols-2 gap-3 mb-4">
             {(['mesa', 'reed'] as HostId[]).map((h) => (
               <button key={h} onClick={() => { d({ t: 'host', host: h }); }} aria-pressed={s.host === h && !s.portrait}
@@ -141,7 +141,7 @@ export function AvatarStep() {
           </div>
           <div className="flex items-center gap-3 mt-3">
             <Button disabled={!live || busy} onClick={generate}>{busy ? 'Generating...' : 'Generate portrait'}</Button>
-            <span className="text-xs text-ink-400">{live ? 'Calls Gemini through the server.' : 'Demo mode: builder is disabled and shows the curated set.'}</span>
+            <span className="text-xs text-ink-400">{live ? 'Generates the portrait on the server.' : 'Demo mode: builder is disabled and shows the curated set.'}</span>
           </div>
           {msg && <p role="alert" className="text-sm text-warn mt-2">{msg}</p>}
           {s.portrait && <div className="mt-3"><Img src={s.portrait} alt="Selected portrait" className="h-40 rounded" /></div>}
@@ -168,6 +168,28 @@ export function VoiceStep() {
   // The script box. It starts as the picked voice's announcement and resets when you pick another voice.
   const [script, setScript] = useState(picked?.intro ?? '');
   useEffect(() => { setScript(picked?.intro ?? ''); }, [picked?.id]);
+
+  // Dictation: the browser's built-in speech recognition (no API key). Hidden where the browser lacks it.
+  const SR = typeof window !== 'undefined' ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : undefined;
+  const rec = useRef<any>(null);
+  const [listening, setListening] = useState(false);
+  const dictate = () => {
+    if (!SR) return;
+    if (listening) { rec.current?.stop(); return; }
+    setMsg(null);
+    const r = new SR();
+    r.lang = 'en-US'; r.continuous = true; r.interimResults = false;
+    r.onresult = (e: any) => {
+      let t = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) t += e.results[i][0].transcript;
+      if (t.trim()) setScript((p) => ((p.trim() ? p.trimEnd() + ' ' : '') + t.trim()).slice(0, 500));
+    };
+    r.onerror = (e: any) => { setMsg(e?.error === 'not-allowed' ? 'Microphone blocked. Allow the microphone for this site and try again.' : `Dictation stopped (${e?.error ?? 'error'}).`); setListening(false); };
+    r.onend = () => setListening(false);
+    rec.current = r;
+    try { r.start(); setListening(true); } catch { setListening(false); }
+  };
+  useEffect(() => () => rec.current?.stop(), []);
 
   const sample = async () => {
     audio?.pause(); setMsg(null);
@@ -221,18 +243,30 @@ export function VoiceStep() {
           })}
         </div>
       </Panel>
-      <Panel title="Script">
+      <Panel title="Your script">
+        {!demo && <p className="text-sm text-ink-200 mb-2">This box is yours. Erase the starting line and write anything you want the voice to say, or press Dictate and speak it.</p>}
         <label className="flex flex-col gap-1 text-xs text-ink-400">
           What {picked ? picked.name : 'the voice'} says
-          <textarea id="voice-script" value={script} onChange={(e) => setScript(e.target.value)} maxLength={500} rows={4} disabled={demo}
-            placeholder="Type what you want the voice to say."
+          <textarea id="voice-script" value={script} onChange={(e) => setScript(e.target.value)} maxLength={500} rows={5} disabled={demo}
+            spellCheck autoCapitalize="sentences" lang="en-US"
+            placeholder="Type or dictate what you want the voice to say."
             className="bg-ink-800 border border-ink-600 rounded px-3 py-2 text-sm text-ink-50 disabled:opacity-50" />
         </label>
+        {!demo && (
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            {SR
+              ? <Button onClick={dictate}>{listening ? 'Stop dictating' : 'Dictate'}</Button>
+              : <span className="text-xs text-ink-400">Dictation is not supported in this browser. Type your script instead.</span>}
+            <Button onClick={() => setScript('')} disabled={!script}>Clear</Button>
+            {listening && <span role="status" className="text-xs text-gold-300">Listening... speak now.</span>}
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-3 mt-3">
           <Button onClick={sample} disabled={busy}>{busy ? 'Working...' : `Play ${picked ? picked.name : HOSTS[s.host].name}'s ${demo ? ex.label + ' clip' : 'script'}`}</Button>
           {!demo && <Button onClick={() => setScript(exampleScript)}>Use the example narration</Button>}
           <span className="text-xs text-ink-400">{demo ? 'Demo mode plays the pre-recorded clip. Typing a script needs Live mode.' : `${script.length} / 500 characters`}</span>
         </div>
+        {!demo && <p className="text-[11px] text-ink-400 mt-2">Spelling is checked by your browser (red underline). Dictation uses your browser's speech recognition, so no key is needed. These voices are AI-generated.</p>}
         {msg && <p role="alert" className="text-sm text-warn mt-2">{msg}</p>}
       </Panel>
       <Button primary className="self-start" onClick={() => d({ t: 'step', step: 'preview' })}>Next: Preview</Button>

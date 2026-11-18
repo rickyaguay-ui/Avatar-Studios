@@ -5,6 +5,7 @@ import http from 'http';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { WebSocketServer, WebSocket } from 'ws';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -12,6 +13,19 @@ const app = express();
 const port = 3000;
 
 app.use(express.json({ limit: '50mb' }));
+
+// Optional shared access code for the hosted Live deployment. Skipped when APP_ACCESS_CODE is unset.
+function sha256(v: string): Buffer {
+  return crypto.createHash('sha256').update(v).digest();
+}
+app.use('/api', (req, res, next) => {
+  const expected = process.env.APP_ACCESS_CODE;
+  if (!expected) return next();
+  if (req.method === 'GET' && req.path === '/integrations/status') return next();
+  const sent = req.get('x-access-code') || '';
+  if (crypto.timingSafeEqual(sha256(sent), sha256(expected))) return next();
+  return res.status(401).json({ error: 'Access code required' });
+});
 
 // Lazy GoogleGenAI initialization
 let aiClient: GoogleGenAI | null = null;
@@ -1338,4 +1352,9 @@ async function startServer() {
   });
 }
 
-startServer();
+// On Vercel the app is exported as a serverless handler; locally it starts its own server.
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
