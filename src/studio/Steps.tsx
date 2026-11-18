@@ -11,7 +11,9 @@ import { BackdropPanel, StarterAvatarsPanel } from './StarterPanels';
 import { ELEVEN_VOICES } from './voices';
 import { usePlayer } from './usePlayer';
 import integrations from '../demo/bundles/integrations.json';
-import { svgToDataUrl, userExample } from '../live/neutral';
+import { userExample } from '../live/neutral';
+import { SQUARE_LABELS, resolveNarrator } from '../live/narrator';
+import { NarratorBadge, SquarePicker } from '../live/NarratorPanel';
 import { LIVE_INTEGRATIONS } from '../live/integrations';
 import { LiveBackdropPanel } from '../live/LiveBackdrop';
 
@@ -33,16 +35,19 @@ export function useCurrent() {
   const ex = live ? userExample(exBase, s.script) : exBase;
   const avatar = s.avatars[s.format];
   const svg = useMemo(() => renderAvatar(avatar), [avatar]);
-  // Live mode shows the user's own avatar (a generated/starter portrait, else the customizer avatar), never Mesa/Reed.
-  const portrait = s.portrait ?? (live ? svgToDataUrl(svg) : ex.portraits[s.host]);
+  // Live mode: the narrator is the user's own avatar (generated/starter portrait, else the customized avatar) and is an
+  // empty placeholder until they build one. Never a Mesa/Reed or stock face. Demo keeps its example portrait.
+  const narrator = resolveNarrator(s, svg);
+  const portrait = live ? (narrator.src ?? '') : (s.portrait ?? ex.portraits[s.host]);
+  const liveFrame = live ? { narrator: narrator.src, square: narrator.squareSrc, showSquare: narrator.showSquare } : undefined;
   // A chosen backdrop replaces the picture in the frame only. Script, timing and export text keep using `ex`.
   const frameEx = s.backdrop ? { ...ex, backdrop: s.backdrop, video: undefined } : ex;
-  return { s, d, ex, exBase, frameEx, avatar, svg, portrait };
+  return { s, d, ex, exBase, frameEx, avatar, svg, portrait, liveFrame, narrator };
 }
 
 /* ---------------- 1. Format ---------------- */
 export function FormatStep() {
-  const { s, d, ex, frameEx, svg, portrait } = useCurrent();
+  const { s, d, ex, frameEx, svg, portrait, liveFrame } = useCurrent();
   const cue = ex.cues[Math.min(1, ex.cues.length - 1)];
   return (
     <div className="grid lg:grid-cols-[320px_1fr] gap-6">
@@ -63,7 +68,7 @@ export function FormatStep() {
       </Panel>
       <div className="flex flex-col gap-4">
         <div className="flex justify-center items-start p-4 rounded-xl bg-ink-900 border border-ink-700 min-h-[400px]">
-          <Frame ex={frameEx} cue={cue} avatarSvg={svg} portrait={portrait} playing={false} showSafe={false} />
+          <Frame ex={frameEx} cue={cue} avatarSvg={svg} portrait={portrait} playing={false} showSafe={false} live={liveFrame} />
         </div>
         {APP_MODE === 'live' && <LiveBackdropPanel />}
       </div>
@@ -220,6 +225,7 @@ export function VoiceStep() {
 
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-6">
+      {!demo && <Panel><NarratorBadge /></Panel>}
       <Panel title="Choose the narrator">
         <div className="grid sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Voice">
           {(Object.keys(HOSTS) as HostId[]).map((h) => (
@@ -288,7 +294,7 @@ export function VoiceStep() {
 
 /* ---------------- 4. Preview ---------------- */
 export function PreviewStep() {
-  const { s, d, ex, frameEx, svg, portrait } = useCurrent();
+  const { s, d, ex, frameEx, svg, portrait, liveFrame } = useCurrent();
   const p = usePlayer(ex, s.host, s.voiceId ?? undefined);
   const [safe, setSafe] = useState(true);
   // Live mode previews what the user built; with no script yet there is nothing to play.
@@ -296,7 +302,7 @@ export function PreviewStep() {
   return (
     <div className="grid lg:grid-cols-[1fr_320px] gap-6">
       <div className="flex flex-col items-center gap-4 p-4 rounded-xl bg-ink-900 border border-ink-700">
-        <Frame ex={frameEx} cue={p.cue} avatarSvg={svg} portrait={portrait} playing={p.playing} showSafe={safe && ex.id === 'tiktok'}
+        <Frame ex={frameEx} cue={p.cue} avatarSvg={svg} portrait={portrait} playing={p.playing} showSafe={safe && ex.id === 'tiktok'} live={liveFrame}
           onStep={p.step} onCue={(i) => i >= 0 && p.seek(ex.cues[i].at)} />
         <div className="w-full max-w-xl rounded-lg bg-black/60 border border-ink-700 px-4 py-3 text-center text-sm text-ink-50 min-h-[3.5rem]" aria-live="polite" aria-label="Captions">
           {p.cue.voiceover || <span className="text-ink-400">(no narration)</span>}
@@ -315,6 +321,7 @@ export function PreviewStep() {
         )}
       </div>
       <div className="flex flex-col gap-6">
+      {APP_MODE === 'live' && <SquarePicker />}
       {APP_MODE === 'live' ? <LiveBackdropPanel /> : <BackdropPanel />}
       <Panel title={APP_MODE === 'live' ? 'Your script' : 'Script'}>
         <ol className="flex flex-col gap-2 text-sm">
@@ -346,7 +353,7 @@ export function ExportStep() {
     'Script:', ...ex.cues.map((c) => `  [${c.at}s] VO: ${c.voiceover || '(none)'}\n        On screen: ${c.onScreen}`), '',
     'Avatar (DiceBear Open Peeps):', JSON.stringify(avatar, null, 2), '',
     'Assets:', ...(APP_MODE === 'live'
-      ? [`  portrait: ${s.portrait ? 'generated or starter portrait from the Avatar step' : 'customizer avatar from the Avatar step'}`, `  backdrop: ${s.backdropPrompt ? `AI scene (Cloudflare FLUX): ${s.backdropPrompt}` : (s.backdrop ?? '(none chosen)')}`]
+      ? [`  narrator avatar: ${s.portrait ? 'generated or starter portrait from the Avatar step' : s.customized ? 'customizer avatar from the Avatar step' : '(none built yet)'}`, `  small square: ${SQUARE_LABELS[s.squareMode]}`, `  backdrop: ${s.backdropPrompt ? `AI scene (Cloudflare FLUX): ${s.backdropPrompt}` : (s.backdrop ?? '(none chosen)')}`]
       : [`  portrait: ${ex.portraits[s.host]}`, `  video: ${ex.video}`, `  voice: ${ex.voices[s.host]}`]),
   ].join('\n');
   const specText = specsToText(s.format) + (s.format === 'pwa' ? `\n\nManifest snippet:\n${pwaManifestSnippet(ex.brand)}` : '');
@@ -358,6 +365,7 @@ export function ExportStep() {
 
   return (
     <div className="flex flex-col gap-6">
+      {APP_MODE === 'live' && <Panel><NarratorBadge /><p className="text-xs text-ink-400 mt-2">Small square: {SQUARE_LABELS[s.squareMode]}.</p></Panel>}
       <Panel title={`Export: ${ex.label}`}>
         <div className="flex flex-wrap gap-3">
           <Button primary onClick={() => copy('Prompt bundle', bundle)}>Copy prompt bundle</Button>

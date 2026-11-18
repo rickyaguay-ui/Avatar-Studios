@@ -13,7 +13,7 @@
     "build:demo": "vite build --mode demo",
     "preview:demo": "vite preview --outDir dist-demo",
     "check:assets": "node scripts/check-assets.mjs",
-    "test": "tsx --test src/live/live.test.ts src/live/server.test.ts"
+    "test": "tsx --test src/live/live.test.ts src/live/server.test.ts src/live/narrator.test.tsx"
   },
   "dependencies": {
     "@dicebear/core": "^10.7.0",

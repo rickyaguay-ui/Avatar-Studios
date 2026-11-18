@@ -5,6 +5,7 @@ import { currentOption, hairColorWorks, setOption } from '../studio/avatar';
 import { Button, Img, Panel } from '../studio/Media';
 import { StarterAvatarsPanel } from '../studio/StarterPanels';
 import { LiveBackdropPanel } from './LiveBackdrop';
+import { SquarePicker } from './NarratorPanel';
 import { FIELDS, HOSTS, useCurrent } from '../studio/Steps';
 import { useDictation } from './dictation';
 import { BLANKS, DEFAULT_FORM, PRESETS, buildPortraitPrompt, type BlankDef, type PortraitForm } from './portraitOptions';
@@ -149,8 +150,10 @@ export function LiveAvatarStep() {
         </Panel>
       </div>
 
+      <SquarePicker />
+
       <div className="grid lg:grid-cols-[3fr_2fr] gap-6 items-start">
-        <StarterAvatarsPanel />
+        <StarterAvatarsPanel resetLabel="Remove this avatar (use the customizer avatar)" />
         <LiveBackdropPanel />
       </div>
 

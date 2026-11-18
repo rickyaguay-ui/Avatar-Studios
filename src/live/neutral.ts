@@ -35,7 +35,3 @@ export function userExample(base: FormatExample, script: string): FormatExample 
   const extra = base.id === 'pwa' ? { ...(base.extra ?? {}), headline: shorten(sentences[0], 60), subhead: sentences.slice(1).join(' ') || ' ' } : base.extra;
   return { ...base, cues, durationSec: total, extra };
 }
-
-export function svgToDataUrl(svg: string): string {
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-}

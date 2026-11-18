@@ -3,8 +3,12 @@ import type { Cue, FormatExample } from '../types';
 import { SAFE_ZONE } from '../config/safeZones';
 import { Img, Pending } from './Media';
 
+/** Live mode: the circle is the narrator (the user's avatar); the small square is selectable. null = empty placeholder. */
+export interface LiveFrameProps { narrator: string | null; square: string | null; showSquare: boolean }
+
 export interface FrameProps {
   ex: FormatExample; cue: Cue; avatarSvg: string; portrait: string; playing: boolean; showSafe: boolean;
+  live?: LiveFrameProps;            // set only in Live mode; Demo is unchanged
   onStep?: (dir: 1 | -1) => void;   // tap navigation (Android)
   onCue?: (index: number) => void;  // jump to a cue (Android system chips)
 }
@@ -36,8 +40,43 @@ const Avatar = ({ svg, size }: { svg: string; size: number }) => (
     dangerouslySetInnerHTML={{ __html: svg }} />
 );
 
+const Silhouette = () => (
+  <svg viewBox="0 0 24 24" className="w-1/2 h-1/2 text-ink-400" fill="currentColor" aria-hidden="true">
+    <circle cx="12" cy="8.5" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z" />
+  </svg>
+);
+
+/** Live: the narrator circle. Empty placeholder until the user builds an avatar; never a stock face. */
+export function NarratorCircle({ src, size }: { src: string | null; size: number }) {
+  return src ? (
+    <div aria-label="Narrator avatar" style={{ width: size, height: size }} className="rounded-full overflow-hidden bg-ink-50 border-2 border-gold-400 shrink-0">
+      <img src={src} alt="Narrator" className="w-full h-full object-cover" />
+    </div>
+  ) : (
+    <div aria-label="No avatar yet" title="No avatar yet" style={{ width: size, height: size }} className="rounded-full border-2 border-dashed border-ink-400 bg-black/40 shrink-0 flex items-center justify-center"><Silhouette /></div>
+  );
+}
+
+/** The profile circle: Demo draws the example avatar; Live draws the narrator. */
+function ProfileCircle({ live, svg, size }: { live?: LiveFrameProps; svg: string; size: number }) {
+  return live ? <NarratorCircle src={live.narrator} size={size} /> : <Avatar svg={svg} size={size} />;
+}
+
+/** The small square: Demo shows the example portrait; Live shows the user's choice (same avatar / another / none). */
+function SquareSlot({ live, portrait, className, imgClass }: { live?: LiveFrameProps; portrait: string; className: string; imgClass: string }) {
+  if (!live) return <div className={className}><Img src={portrait} alt="Host portrait" className={imgClass} /></div>;
+  if (!live.showSquare) return null;
+  return (
+    <div aria-label="Small square" className={className}>
+      {live.square
+        ? <img src={live.square} alt="Small square avatar" className={imgClass} />
+        : <div aria-label="No avatar yet" className="w-full h-full border border-dashed border-ink-400 bg-black/40 flex items-center justify-center"><Silhouette /></div>}
+    </div>
+  );
+}
+
 /* ---------- TikTok / Reels 9:16 ---------- */
-export function TiktokFrame({ ex, cue, avatarSvg, portrait, playing, showSafe }: FrameProps) {
+export function TiktokFrame({ ex, cue, avatarSvg, portrait, playing, showSafe, live }: FrameProps) {
   const z = SAFE_ZONE;
   return (
     <div className="relative bg-black rounded-[28px] border-4 border-ink-600 overflow-hidden" style={{ aspectRatio: '9 / 16', width: 270 }}>
@@ -45,13 +84,13 @@ export function TiktokFrame({ ex, cue, avatarSvg, portrait, playing, showSafe }:
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
       <div className="absolute top-2 inset-x-0 flex justify-center gap-4 text-[10px] text-white/80 font-semibold"><span>Following</span><span className="border-b border-white">For You</span></div>
       <div className="absolute right-2 bottom-24 flex flex-col items-center gap-3 text-[9px] text-white/80">
-        <Avatar svg={avatarSvg} size={34} /><span>Like</span><span>Reply</span><span>Share</span>
+        <ProfileCircle live={live} svg={avatarSvg} size={34} /><span>Like</span><span>Reply</span><span>Share</span>
       </div>
       <div className="absolute left-2 bottom-3 right-14 text-[10px] text-white/90"><b>@example_handle</b><br />{ex.brand}</div>
       <div className="absolute flex items-center justify-center text-center" style={{ top: `${z.top * 100 + 25}%`, left: `${z.left * 100}%`, right: `${z.right * 100}%` }}>
         <span key={cue.onScreen} className="bg-black/60 text-gold-300 font-display font-bold text-[17px] leading-tight px-2 py-1 rounded">{cue.onScreen}</span>
       </div>
-      <div className="absolute left-2 bottom-12 w-12 h-12 rounded-md overflow-hidden border border-gold-400"><Img src={portrait} alt="Host portrait" className="w-full h-full object-cover" /></div>
+      <SquareSlot live={live} portrait={portrait} className="absolute left-2 bottom-12 w-12 h-12 rounded-md overflow-hidden border border-gold-400" imgClass="w-full h-full object-cover" />
       {showSafe && (
         <div className="absolute border border-dashed border-gold-400/80 pointer-events-none" aria-label="Safe zone overlay"
           style={{ top: `${z.top * 100}%`, bottom: `${z.bottom * 100}%`, left: `${z.left * 100}%`, right: `${z.right * 100}%` }} />
@@ -79,7 +118,7 @@ export function RbLogo({ size = 160, slam = false }: { size?: number; slam?: boo
 /* ---------- Android native app 9:19.5 ----------
    Opens on the logo slam, then runs like a vertical short: one system per caption.
    Tap the left third of the screen to go back, anywhere else to go forward. The six chips jump straight to a system. */
-export function AndroidFrame({ ex, cue, avatarSvg, portrait, playing, onStep, onCue }: FrameProps) {
+export function AndroidFrame({ ex, cue, avatarSvg, portrait, playing, onStep, onCue, live }: FrameProps) {
   const x = ex.extra as { cards: { title: string; text: string }[] };
   const idx = ex.cues.indexOf(cue);
   const sysIdx = (title: string) => ex.cues.findIndex((c) => c.onScreen.endsWith(title));
@@ -100,7 +139,7 @@ export function AndroidFrame({ ex, cue, avatarSvg, portrait, playing, onStep, on
           {ex.cues.map((c, i) => <span key={i} className={`h-0.5 flex-1 rounded ${i <= idx ? 'bg-gold-400' : 'bg-white/25'}`} />)}
         </div>
         <div className="absolute top-4 inset-x-2 z-20 flex items-center gap-2">
-          <Avatar svg={avatarSvg} size={26} />
+          <ProfileCircle live={live} svg={avatarSvg} size={26} />
           <span className="text-[11px] font-semibold text-gold-300 flex-1 truncate">{ex.brand}</span>
           <span className="bg-gold-400 text-ink-950 text-[10px] font-bold rounded-md px-2 py-1 shadow-lg">Install app</span>
         </div>
@@ -113,9 +152,7 @@ export function AndroidFrame({ ex, cue, avatarSvg, portrait, playing, onStep, on
         {!logo && (
           <div className="absolute bottom-0 inset-x-0 z-20 p-2 flex flex-col gap-1.5">
             <div className="flex items-end gap-2">
-              <div className="w-12 h-14 rounded-md overflow-hidden border border-gold-400 shrink-0">
-                <Img src={portrait} alt="Host portrait" className="w-full h-full object-cover object-[50%_68%]" />
-              </div>
+              <SquareSlot live={live} portrait={portrait} className="w-12 h-14 rounded-md overflow-hidden border border-gold-400 shrink-0" imgClass="w-full h-full object-cover object-[50%_68%]" />
               <p className="text-[10px] text-ink-50 leading-snug">{active ? active.text : ((x as { fallback?: string }).fallback ?? 'Shelter, heat, power, water, waste, and food. One app.')}</p>
             </div>
             <div className="grid grid-cols-3 gap-1">
@@ -139,7 +176,7 @@ export function AndroidFrame({ ex, cue, avatarSvg, portrait, playing, onStep, on
 }
 
 /* ---------- PWA web 16:9 browser ---------- */
-export function PwaFrame({ ex, cue, avatarSvg, portrait, playing }: FrameProps) {
+export function PwaFrame({ ex, cue, avatarSvg, portrait, playing, live }: FrameProps) {
   const x = ex.extra as { headline: string; subhead: string; cards: { title: string; text: string }[]; caveat: string; url?: string };
   const idx = ex.cues.indexOf(cue);
   return (
@@ -153,12 +190,12 @@ export function PwaFrame({ ex, cue, avatarSvg, portrait, playing }: FrameProps) 
         <div className="absolute inset-0 bg-ink-950/60" />
         <div className="relative z-10 h-full flex items-center gap-4 px-6">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2"><Avatar svg={avatarSvg} size={28} /><span className="text-[11px] text-gold-300 font-semibold">{ex.brand}</span></div>
+            <div className="flex items-center gap-2 mb-2"><ProfileCircle live={live} svg={avatarSvg} size={28} /><span className="text-[11px] text-gold-300 font-semibold">{ex.brand}</span></div>
             <h3 className="font-display text-xl leading-tight text-ink-50">{x.headline}</h3>
             <p className="text-[11px] text-ink-200 mt-1">{x.subhead}</p>
             <div className="mt-3 inline-block bg-gold-400 text-ink-950 text-[11px] font-bold rounded px-3 py-1">Install the app</div>
           </div>
-          <div className="w-24 h-32 rounded-lg overflow-hidden border border-gold-400 shrink-0"><Img src={portrait} alt="Host portrait" className="w-full h-full object-cover" /></div>
+          <SquareSlot live={live} portrait={portrait} className="w-24 h-32 rounded-lg overflow-hidden border border-gold-400 shrink-0" imgClass="w-full h-full object-cover" />
         </div>
         <div className="absolute bottom-2 inset-x-0 z-10 text-center"><span key={idx} className="inline-block bg-black/70 text-gold-300 text-[11px] px-2 py-0.5 rounded">{cue.onScreen}</span></div>
       </div>
