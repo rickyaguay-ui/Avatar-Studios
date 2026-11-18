@@ -16,6 +16,7 @@ import { SQUARE_LABELS, resolveNarrator } from '../live/narrator';
 import { NarratorBadge, SquarePicker } from '../live/NarratorPanel';
 import { LIVE_INTEGRATIONS } from '../live/integrations';
 import { LiveBackdropPanel } from '../live/LiveBackdrop';
+import { ExportFiles } from '../live/ExportFiles';
 
 const FORMAT_BLURB: Record<FormatId, string> = {
   android: 'Native app intro: system splash, then three onboarding cards.',
@@ -371,17 +372,9 @@ export function ExportStep() {
           <Button primary onClick={() => copy('Prompt bundle', bundle)}>Copy prompt bundle</Button>
           <Button onClick={() => copy('Specs', specText)}>Copy specs</Button>
         </div>
-        {APP_MODE === 'live' && s.backdropPrompt && s.backdrop && (
-          <div className="mt-4 flex items-center gap-3">
-            <img src={s.backdrop} alt="Your AI scene" className="w-40 aspect-video object-cover rounded border border-ink-700" />
-            <div className="text-xs text-ink-400 flex flex-col gap-2">
-              <span>Your AI scene (widescreen JPEG). It is the backdrop in your Preview.</span>
-              <a href={s.backdrop} download="avatar-studios-scene.jpg" className="self-start px-3 py-1.5 rounded-md text-sm font-semibold bg-ink-700 text-ink-50 hover:bg-ink-600 border border-ink-600">Download scene</a>
-            </div>
-          </div>
-        )}
         {msg && <p role="status" className="text-sm text-ok mt-3">{msg}</p>}
       </Panel>
+      {APP_MODE === 'live' && <ExportFiles bundle={bundle} />}
       <div className="grid lg:grid-cols-2 gap-6">
         <Panel title="Expected output by platform">
           <div className="flex flex-col gap-4">

@@ -61,9 +61,7 @@ export function LiveBackdropPanel() {
       {ai && s.backdrop && (
         <p className="text-xs text-gold-300 mt-2">AI scene in use: {s.backdropPrompt}</p>
       )}
-      {ai && s.backdrop && (
-        <a href={s.backdrop} download="avatar-studios-scene.jpg" className="inline-block mt-2 px-4 py-2 rounded-md text-sm font-semibold bg-ink-700 text-ink-50 hover:bg-ink-600 border border-ink-600">Download scene</a>
-      )}
+      {ai && s.backdrop && <p className="text-xs text-ink-400 mt-1">Name, save or share it in the Export step.</p>}
 
       <details className="mt-4" open={!ai}>
         <summary className="text-xs text-ink-400 cursor-pointer">Preloaded backdrops (fallback)</summary>
