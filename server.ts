@@ -281,11 +281,85 @@ async function parseImageToPart(imageUrl: string): Promise<{ inlineData: { mimeT
   return null;
 }
 
-// 2. High-Quality Image Generation & Editing using gemini-3.1-flash-image-preview
-app.post('/api/generate-image', async (req, res) => {
-  if (!process.env.GEMINI_API_KEY) {
-    return res.status(503).json({ error: 'Gemini API key not configured. Add GEMINI_API_KEY to your .env file.' });
+// Cloudflare Workers AI (FLUX schnell): free, text-only image provider.
+function cloudflareConfigured(): boolean {
+  return !!(process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN);
+}
+
+async function generateWithCloudflare(prompt: string): Promise<string> {
+  const account = process.env.CLOUDFLARE_ACCOUNT_ID;
+  const token = process.env.CLOUDFLARE_API_TOKEN;
+  const resp = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/@cf/black-forest-labs/flux-1-schnell`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt.slice(0, 2048), steps: 4 }),
+    },
+  );
+  const json: any = await resp.json().catch(() => null);
+  if (!resp.ok || !json?.result?.image) {
+    const msg = json?.errors?.[0]?.message || `HTTP ${resp.status}`;
+    throw new Error(`Cloudflare image generation failed: ${msg}`);
   }
+  return `data:image/jpeg;base64,${json.result.image}`;
+}
+
+function isGeminiAccessError(err: any): boolean {
+  const text = `${err?.status ?? ''} ${err?.code ?? ''} ${err?.message ?? ''}`.toLowerCase();
+  return /\b403\b|permission|billing|quota|denied|not enabled|resource_exhausted/.test(text);
+}
+
+function buildCloudflarePrompt(body: any): string {
+  const { prompt, styleDirectives } = body || {};
+  if (styleDirectives && typeof styleDirectives === 'string' && styleDirectives.trim()) {
+    return `[MANDATORY STYLE PRIMER]: ${styleDirectives.trim()}\n[SUBJECT]: ${prompt}`;
+  }
+  return prompt;
+}
+
+// 2. High-Quality Image Generation & Editing using gemini-3.1-flash-image-preview
+//    (Cloudflare FLUX schnell is the free second provider.)
+app.post('/api/generate-image', async (req, res) => {
+  const geminiOk = !!process.env.GEMINI_API_KEY;
+  const cloudflareOk = cloudflareConfigured();
+  if (!geminiOk && !cloudflareOk) {
+    return res.status(503).json({
+      error: 'No image provider configured. Add GEMINI_API_KEY or CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN to your .env file.',
+    });
+  }
+
+  const sendCloudflare = async (reason: string) => {
+    const hasImage = !!(req.body?.sourceImageUrl || req.body?.referenceImageUrl);
+    if (hasImage) console.log('Cloudflare FLUX is text-only: ignoring the reference/source image.');
+    const started = Date.now();
+    const imageUrl = await generateWithCloudflare(buildCloudflarePrompt(req.body));
+    console.log(`[image] provider=cloudflare (${reason}) ${Date.now() - started}ms`);
+    return res.json({
+      imageUrl,
+      provider: 'cloudflare',
+      prompt: req.body.prompt,
+      imageSize: req.body.imageSize || '1K',
+      aspectRatio: req.body.aspectRatio || '16:9',
+      isEdit: false,
+      stylePrimed: !!req.body.styleDirectives,
+    });
+  };
+
+  const wantsImage = !!(req.body?.sourceImageUrl || req.body?.referenceImageUrl);
+  const preferCloudflare =
+    cloudflareOk &&
+    req.body?.prompt &&
+    (!geminiOk || (process.env.IMAGE_PROVIDER === 'cloudflare' && !wantsImage));
+  if (preferCloudflare) {
+    try {
+      return await sendCloudflare(geminiOk ? 'IMAGE_PROVIDER=cloudflare' : 'Gemini not configured');
+    } catch (error: any) {
+      console.error('Cloudflare image error:', error?.message || error);
+      return res.status(500).json({ error: error?.message || 'Failed to generate image' });
+    }
+  }
+
   try {
     const {
       prompt,
@@ -399,8 +473,10 @@ app.post('/api/generate-image', async (req, res) => {
       });
     }
 
+    console.log('[image] provider=gemini');
     res.json({
       imageUrl,
+      provider: 'gemini',
       prompt,
       finalPrompt,
       imageSize,
@@ -409,6 +485,15 @@ app.post('/api/generate-image', async (req, res) => {
       stylePrimed: !!(styleDirectives || imagePart),
     });
   } catch (error: any) {
+    if (cloudflareOk && req.body?.prompt && isGeminiAccessError(error)) {
+      console.warn('Gemini image failed with access/billing error, falling back to Cloudflare:', error?.message || error);
+      try {
+        return await sendCloudflare('Gemini access error fallback');
+      } catch (cfErr: any) {
+        console.error('Cloudflare fallback error:', cfErr?.message || cfErr);
+        return res.status(500).json({ error: cfErr?.message || 'Failed to generate image' });
+      }
+    }
     console.error('Image Generation API Error:', error);
     res.status(500).json({
       error: error?.message || 'Failed to generate image',
@@ -948,6 +1033,7 @@ function resolveVoiceId(voiceId?: string, characterName?: string): string | null
 app.get('/api/integrations/status', (_req, res) => {
   res.json({
     gemini: !!process.env.GEMINI_API_KEY,
+    cloudflare: cloudflareConfigured(),
     elevenlabs: !!process.env.ELEVENLABS_API_KEY,
     hedra: !!process.env.HEDRA_API_KEY,
   });

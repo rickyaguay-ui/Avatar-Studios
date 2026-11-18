@@ -13,3 +13,6 @@ projects_data.json
 dist-demo/
 .image-originals/
 .vercel
+
+# local script output
+scripts/out/
