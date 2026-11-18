@@ -3,10 +3,11 @@ import { StudioProvider, STEPS, useStudio } from './studio/state';
 import { AvatarStep, ExportStep, FormatStep, IntegrationsStep, PreviewStep, VoiceStep } from './studio/Steps';
 import { Onboarding } from './studio/Onboarding';
 import { HelpButton, LiveWalkthrough } from './live/LiveGuide';
+import { LiveAvatarStep } from './live/LiveAvatar';
 
 function Shell() {
   const { s, d } = useStudio();
-  const Screen = { format: FormatStep, avatar: AvatarStep, voice: VoiceStep, preview: PreviewStep, export: ExportStep, integrations: IntegrationsStep }[s.step];
+  const Screen = { format: FormatStep, avatar: APP_MODE === 'live' ? LiveAvatarStep : AvatarStep, voice: VoiceStep, preview: PreviewStep, export: ExportStep, integrations: IntegrationsStep }[s.step];
   return (
     <div className="min-h-screen bg-ink-950 text-ink-50">
       <header className="relative border-b border-ink-700 bg-ink-900">

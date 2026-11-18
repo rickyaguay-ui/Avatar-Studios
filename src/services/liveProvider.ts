@@ -1,6 +1,7 @@
 import type { Provider } from './provider';
 import type { Result } from '../types';
 import { getExample } from './examples';
+import { neutralExample } from '../live/neutral';
 
 const ACCESS_CODE_KEY = 'avatarStudiosAccessCode';
 
@@ -38,7 +39,8 @@ async function post<T>(url: string, body: unknown, serviceKey: string): Promise<
 /** Live provider: same interface, calls the server's /api routes. */
 export const liveProvider: Provider = {
   mode: 'live',
-  getExample,
+  // Live mode starts blank: no built-in example script (the Mesa/Reed copy stays in Demo mode only).
+  getExample: (f) => neutralExample(getExample(f)),
   async getIntegrationStatus() {
     try {
       const res = await fetch('/api/integrations/status');
@@ -50,7 +52,7 @@ export const liveProvider: Provider = {
   },
   async generatePortrait(r) {
     const who = r.host === 'mesa' ? 'woman in her late 30s, calm and clear expression' : 'man in his 40s, warm and direct expression';
-    const prompt = `Portrait of a fictional ${who}, ${r.hairstyle} hair, wearing ${r.clothing}, ${r.bodyType} build, ${r.framing} framing, ${r.artStyle} style, soft natural window light, neutral studio backdrop, sharp focus, head and shoulders. Synthetic person, no text, no logos.`;
+    const prompt = r.prompt || `Portrait of a fictional ${who}, ${r.hairstyle} hair, wearing ${r.clothing}, ${r.bodyType} build, ${r.framing} framing, ${r.artStyle} style, soft natural window light, neutral studio backdrop, sharp focus, head and shoulders. Synthetic person, no text, no logos.`;
     const res = await post<{ imageUrl: string }>('/api/generate-image', { prompt, aspectRatio: '9:16' }, 'Image generation');
     return res;
   },

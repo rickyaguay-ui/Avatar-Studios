@@ -1,35 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../studio/Media';
 import { STEPS, useStudio } from '../studio/state';
 import { GUIDE, WELCOME, type GuideEntry } from './guide';
 
-const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window;
-
-function useReadAloud() {
-  const [speaking, setSpeaking] = useState(false);
-  const stop = () => { if (canSpeak) window.speechSynthesis.cancel(); setSpeaking(false); };
-  const say = (text: string) => {
-    if (!canSpeak) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.onend = () => setSpeaking(false);
-    u.onerror = () => setSpeaking(false);
-    setSpeaking(true);
-    window.speechSynthesis.speak(u);
-  };
-  useEffect(() => stop, []);
-  return { speaking, say, stop };
-}
-
-/** Live-mode walkthrough: one text card per section, with optional Read aloud (device voice, no API). */
+/** Live-mode walkthrough: one text card per section. Text only, no audio. */
 export function LiveWalkthrough() {
   const { d } = useStudio();
   const slides: GuideEntry[] = [WELCOME, ...STEPS.map((st) => GUIDE[st.id])];
   const [i, setI] = useState(0);
-  const { speaking, say, stop } = useReadAloud();
   const slide = slides[i];
-  useEffect(() => { stop(); }, [i]);
-  const close = () => { stop(); d({ t: 'walkthrough', open: false }); };
+  const close = () => d({ t: 'walkthrough', open: false });
   return (
     <div role="dialog" aria-modal="true" aria-label="Walkthrough" className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 overflow-auto">
       <div className="w-full max-w-xl rounded-2xl border border-gold-700 bg-ink-900 p-6">
@@ -42,10 +22,7 @@ export function LiveWalkthrough() {
         <ul className="mt-4 flex flex-col gap-1.5 list-disc pl-5 text-sm text-ink-200">
           {slide.can.map((c) => <li key={c}>{c}</li>)}
         </ul>
-        <div className="flex items-center justify-between mt-6">
-          {canSpeak
-            ? <Button onClick={() => (speaking ? stop() : say(slide.say))}>{speaking ? 'Stop' : 'Read aloud'}</Button>
-            : <span className="text-xs text-ink-400">Read aloud is not available in this browser.</span>}
+        <div className="flex items-center justify-end mt-6">
           <div className="flex gap-2">
             <Button disabled={i === 0} onClick={() => setI(i - 1)}>Back</Button>
             {i < slides.length - 1 ? <Button primary onClick={() => setI(i + 1)}>Next</Button> : <Button primary onClick={close}>Start</Button>}
@@ -60,9 +37,7 @@ export function LiveWalkthrough() {
 export function HelpButton() {
   const { s, d } = useStudio();
   const [open, setOpen] = useState(false);
-  const { speaking, say, stop } = useReadAloud();
   const g = GUIDE[s.step];
-  useEffect(() => { stop(); }, [s.step, open]);
   return (
     <div>
       <button onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="help-panel"
@@ -80,7 +55,6 @@ export function HelpButton() {
             {g.can.map((c) => <li key={c}>{c}</li>)}
           </ul>
           <div className="flex gap-2 mt-4">
-            {canSpeak && <Button onClick={() => (speaking ? stop() : say(g.say))}>{speaking ? 'Stop' : 'Read aloud'}</Button>}
             <Button onClick={() => { setOpen(false); d({ t: 'walkthrough', open: true }); }}>Replay walkthrough</Button>
           </div>
         </div>

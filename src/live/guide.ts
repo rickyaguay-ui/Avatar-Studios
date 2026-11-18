@@ -1,5 +1,4 @@
-// Live-mode guide text. Text only: nothing here is pre-recorded, so it works with no keys and no audio files.
-// Read aloud uses the device's own speech voice (speechSynthesis), which needs no API.
+// Live-mode guide text. Text only: no narration audio of any kind.
 import type { StepId } from '../studio/state';
 
 export interface GuideEntry { title: string; say: string; can: string[] }
@@ -14,12 +13,12 @@ export const GUIDE: Record<StepId, GuideEntry> = {
   format: {
     title: '1. Format',
     say: 'Pick what you are making: a TikTok or Reel, a web intro for a PWA, or an Android app intro. This sets the screen shape and the starting script.',
-    can: ['Choose TikTok / Reel, PWA web intro, or Android app intro.', 'The choice sets the frame shape used in Preview.', 'You can come back and change it at any time.'],
+    can: ['Choose TikTok / Reel, PWA web intro, or Android app intro.', 'The choice sets the frame shape used in Preview.', 'Click a backdrop to change the scenery in the frame.', 'You can come back and change it at any time.'],
   },
   avatar: {
     title: '2. Avatar',
-    say: 'Design the face. Use the customizer for a drawn avatar, the AI portrait builder for a realistic portrait, or pick a starter avatar. Change any field, then press Generate portrait and give it a few seconds.',
-    can: ['Customizer: change hair, expression, clothing and more. It updates instantly and costs nothing.', 'AI portrait builder: fill in the fields and press Generate portrait. A new image appears in a few seconds.', 'Starter avatars: click one to use it as the portrait.', 'If the site asks for an access code, enter it once. It is remembered on this device.'],
+    say: 'Design the face. Use the customizer for a drawn avatar, or build a realistic portrait by filling in the blanks: subject, age, skin tone, hair, build, expression, wardrobe, setting, lighting and style. Add your own words or speak them with the mic, then press Generate portrait.',
+    can: ['Customizer: change hair, expression, clothing and more. It updates instantly and costs nothing.', 'AI portrait builder: every blank becomes part of the description. Mesa and Reed are example presets you can load and change.', 'Your own details: type or press the mic to speak extra details, or tick "Use only my text".', 'Starter avatars: click one to use it as the portrait.', 'Backdrops: click one to change the scenery behind the avatar.', 'If the site asks for an access code, enter it once. It is remembered on this device.'],
   },
   voice: {
     title: '3. Voice',
@@ -28,8 +27,8 @@ export const GUIDE: Record<StepId, GuideEntry> = {
   },
   preview: {
     title: '4. Preview',
-    say: 'Watch your avatar and voice together in the frame. Step through each moment, and turn on Safe zone to see what TikTok covers.',
-    can: ['Play, pause, step back or forward, or drag the timeline.', 'Safe zone shows the areas TikTok overlays with buttons and captions.', 'Pick a backdrop in the panel on the right.', 'Click any line in the script list to jump to that moment.'],
+    say: 'This previews what you built: your avatar, your script and your chosen voice. Play it, step through each line, and change the backdrop. Turn on Safe zone to see what TikTok covers.',
+    can: ['It uses the avatar from step 2 and the script you wrote in step 3. Nothing here is pre-written.', 'Play, pause, step back or forward, or drag the timeline.', 'Pick a backdrop in the panel on the right.', 'Click any line in the script list to jump to that moment.', 'Empty? Go back to Voice and write your script first.'],
   },
   export: {
     title: '5. Export',

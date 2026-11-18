@@ -4,6 +4,7 @@ import { liveProvider } from './liveProvider';
 
 export interface PortraitRequest {
   hairstyle: string; clothing: string; bodyType: string; framing: string; artStyle: string; host: HostId;
+  prompt?: string;   // Live mode: the fully assembled prompt (overrides the fields above)
 }
 export interface SpeakRequest { format: FormatId; host: HostId; text: string; voiceId?: string }
 export type IntegrationStatus = Record<IntegrationId, boolean>;

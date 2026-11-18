@@ -11,26 +11,32 @@ import { BackdropPanel, StarterAvatarsPanel } from './StarterPanels';
 import { ELEVEN_VOICES } from './voices';
 import { usePlayer } from './usePlayer';
 import integrations from '../demo/bundles/integrations.json';
+import { svgToDataUrl, userExample } from '../live/neutral';
+import { LIVE_INTEGRATIONS } from '../live/integrations';
 
 const FORMAT_BLURB: Record<FormatId, string> = {
   android: 'Native app intro: system splash, then three onboarding cards.',
   pwa: 'Web / PWA landing page in a 16:9 browser frame with an install button.',
   tiktok: 'Vertical 9:16 short for TikTok / Reels with a configurable safe-zone overlay.',
 };
-const HOSTS: Record<HostId, { name: string; blurb: string }> = {
+export const HOSTS: Record<HostId, { name: string; blurb: string }> = {
   mesa: { name: 'Mesa', blurb: 'Woman, late 30s, calm and clear. Explains the why.' },
   reed: { name: 'Reed', blurb: 'Man, 40s, warm and direct. Explains the how.' },
 };
 
-function useCurrent() {
+export function useCurrent() {
   const { s, d } = useStudio();
-  const ex = provider.getExample(s.format);
+  const live = APP_MODE === 'live';
+  const exBase = provider.getExample(s.format);
+  // Live mode: the script, timing and captions come from what the user wrote. Demo mode: the built-in example.
+  const ex = live ? userExample(exBase, s.script) : exBase;
   const avatar = s.avatars[s.format];
   const svg = useMemo(() => renderAvatar(avatar), [avatar]);
-  const portrait = s.portrait ?? ex.portraits[s.host];
+  // Live mode shows the user's own avatar (a generated/starter portrait, else the customizer avatar), never Mesa/Reed.
+  const portrait = s.portrait ?? (live ? svgToDataUrl(svg) : ex.portraits[s.host]);
   // A chosen backdrop replaces the picture in the frame only. Script, timing and export text keep using `ex`.
   const frameEx = s.backdrop ? { ...ex, backdrop: s.backdrop, video: undefined } : ex;
-  return { s, d, ex, frameEx, avatar, svg, portrait };
+  return { s, d, ex, exBase, frameEx, avatar, svg, portrait };
 }
 
 /* ---------------- 1. Format ---------------- */
@@ -54,15 +60,18 @@ export function FormatStep() {
         </div>
         <Button primary className="mt-4 w-full" onClick={() => d({ t: 'step', step: 'avatar' })}>Next: Avatar</Button>
       </Panel>
-      <div className="flex justify-center items-start p-4 rounded-xl bg-ink-900 border border-ink-700 min-h-[400px]">
-        <Frame ex={frameEx} cue={cue} avatarSvg={svg} portrait={portrait} playing={false} showSafe={false} />
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-center items-start p-4 rounded-xl bg-ink-900 border border-ink-700 min-h-[400px]">
+          <Frame ex={frameEx} cue={cue} avatarSvg={svg} portrait={portrait} playing={false} showSafe={false} />
+        </div>
+        {APP_MODE === 'live' && <BackdropPanel />}
       </div>
     </div>
   );
 }
 
 /* ---------------- 2. Avatar ---------------- */
-const FIELDS: { field: Parameters<typeof setOption>[1]; label: string; list: string[]; color?: boolean; none?: boolean }[] = [
+export const FIELDS: { field: Parameters<typeof setOption>[1]; label: string; list: string[]; color?: boolean; none?: boolean }[] = [
   { field: 'head', label: 'Head / hair', list: AVATAR_CHOICES.head },
   { field: 'expression', label: 'Expression', list: AVATAR_CHOICES.expression },
   { field: 'facialHair', label: 'Facial hair', list: AVATAR_CHOICES.facialHair, none: true },
@@ -156,7 +165,7 @@ export function AvatarStep() {
 
 /* ---------------- 3. Voice ---------------- */
 export function VoiceStep() {
-  const { s, d, ex } = useCurrent();
+  const { s, d, exBase: ex } = useCurrent();
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
@@ -168,6 +177,8 @@ export function VoiceStep() {
   // The script box. It starts as the picked voice's announcement and resets when you pick another voice.
   const [script, setScript] = useState(picked?.intro ?? '');
   useEffect(() => { setScript(picked?.intro ?? ''); }, [picked?.id]);
+  // Live mode: share the script so the Preview plays what the user wrote here.
+  useEffect(() => { if (!demo) d({ t: 'script', text: script }); }, [script, demo]);
 
   // Dictation: the browser's built-in speech recognition (no API key). Hidden where the browser lacks it.
   const SR = typeof window !== 'undefined' ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : undefined;
@@ -277,8 +288,10 @@ export function VoiceStep() {
 /* ---------------- 4. Preview ---------------- */
 export function PreviewStep() {
   const { s, d, ex, frameEx, svg, portrait } = useCurrent();
-  const p = usePlayer(ex, s.host);
+  const p = usePlayer(ex, s.host, s.voiceId ?? undefined);
   const [safe, setSafe] = useState(true);
+  // Live mode previews what the user built; with no script yet there is nothing to play.
+  const noScript = APP_MODE === 'live' && !s.script.trim();
   return (
     <div className="grid lg:grid-cols-[1fr_320px] gap-6">
       <div className="flex flex-col items-center gap-4 p-4 rounded-xl bg-ink-900 border border-ink-700">
@@ -289,16 +302,20 @@ export function PreviewStep() {
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={() => p.step(-1)} title="Previous step">Back</Button>
-          {p.playing ? <Button primary onClick={p.pause}>Pause</Button> : <Button primary onClick={p.play}>Play</Button>}
+          {p.playing ? <Button primary onClick={p.pause}>Pause</Button> : <Button primary onClick={p.play} disabled={noScript}>Play</Button>}
           <Button onClick={() => p.step(1)} title="Next step">Step</Button>
           {ex.id === 'tiktok' && <label className="text-xs text-ink-400 ml-3 flex items-center gap-1"><input type="checkbox" checked={safe} onChange={(e) => setSafe(e.target.checked)} />Safe zone</label>}
         </div>
         <input type="range" aria-label="Timeline" min={0} max={ex.durationSec} step={0.1} value={p.t} onChange={(e) => p.seek(Number(e.target.value))} className="w-full max-w-xl accent-gold-400" />
         {p.notice && <p role="alert" className="text-sm text-warn">{p.notice}</p>}
+        {noScript && (
+          <p className="text-sm text-gold-300 text-center">This previews what you build. Write your script in the Voice step, then come back and press Play.
+            {' '}<button className="underline" onClick={() => d({ t: 'step', step: 'voice' })}>Go to Voice</button></p>
+        )}
       </div>
       <div className="flex flex-col gap-6">
       <BackdropPanel />
-      <Panel title="Script">
+      <Panel title={APP_MODE === 'live' ? 'Your script' : 'Script'}>
         <ol className="flex flex-col gap-2 text-sm">
           {ex.cues.map((c, i) => (
             <li key={i}>
@@ -324,10 +341,12 @@ export function ExportStep() {
   const specs = exportSpecs(s.format);
 
   const bundle = [
-    `Brand: ${ex.brand}`, `Format: ${ex.label}`, `Narrator: ${HOSTS[s.host].name}`, '',
+    `Brand: ${ex.brand}`, `Format: ${ex.label}`, `Narrator: ${APP_MODE === 'live' ? (ELEVEN_VOICES.find((v) => (s.voiceId ? v.id === s.voiceId : v.host === s.host))?.name ?? 'ElevenLabs voice') : HOSTS[s.host].name}`, '',
     'Script:', ...ex.cues.map((c) => `  [${c.at}s] VO: ${c.voiceover || '(none)'}\n        On screen: ${c.onScreen}`), '',
     'Avatar (DiceBear Open Peeps):', JSON.stringify(avatar, null, 2), '',
-    'Assets:', `  portrait: ${ex.portraits[s.host]}`, `  video: ${ex.video}`, `  voice: ${ex.voices[s.host]}`,
+    'Assets:', ...(APP_MODE === 'live'
+      ? [`  portrait: ${s.portrait ? 'generated or starter portrait from the Avatar step' : 'customizer avatar from the Avatar step'}`, `  backdrop: ${s.backdrop ?? '(none chosen)'}`]
+      : [`  portrait: ${ex.portraits[s.host]}`, `  video: ${ex.video}`, `  voice: ${ex.voices[s.host]}`]),
   ].join('\n');
   const specText = specsToText(s.format) + (s.format === 'pwa' ? `\n\nManifest snippet:\n${pwaManifestSnippet(ex.brand)}` : '');
 
@@ -373,6 +392,10 @@ export function IntegrationsStep() {
   const [status, setStatus] = useState<Record<string, boolean> | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const demo = APP_MODE === 'demo';
+  // Demo reads the Demo bundle untouched. Live uses its own cards (Cloudflare FLUX images + ElevenLabs voice).
+  const cards: { id: string; name: string; powers: string; how: string; envVar: string }[] = APP_MODE === 'demo'
+    ? (integrations as IntegrationInfo[])
+    : LIVE_INTEGRATIONS.map((c) => ({ id: c.id, name: c.name, powers: c.powers, how: c.how, envVar: c.envVars }));
   useEffect(() => {
     if (demo) return;
     provider.getIntegrationStatus().then((r) => (r.ok ? setStatus(r.data) : setErr(r.message)));
@@ -381,7 +404,7 @@ export function IntegrationsStep() {
   return (
     <div className="flex flex-col gap-4 max-w-3xl mx-auto">
       {demo && <p className="rounded-lg border border-gold-700 bg-ink-800 px-4 py-2 text-sm text-gold-300">Demo mode: integrations are shown for reference and are disabled. This site holds no keys and makes no live calls.</p>}
-      {(integrations as IntegrationInfo[]).map((i) => {
+      {cards.map((i) => {
         const configured = status?.[i.id];
         return (
           <Panel key={i.id}>
@@ -390,7 +413,7 @@ export function IntegrationsStep() {
                 <h3 className="font-display text-lg text-ink-50">{i.name}</h3>
                 <p className="text-sm text-ink-200 mt-1"><b>Powers:</b> {i.powers}</p>
                 <p className="text-sm text-ink-400 mt-1"><b>How:</b> {i.how}</p>
-                {!demo && <p className="text-xs text-ink-400 mt-2">Key lives in <code className="text-gold-300">.env</code> as <code className="text-gold-300">{i.envVar}</code>. This app never accepts a key.</p>}
+                {!demo && <p className="text-xs text-ink-400 mt-2">Stored on the server as <code className="text-gold-300">{i.envVar}</code>. This app never accepts a key.</p>}
               </div>
               <span className={`text-xs font-semibold rounded-full px-3 py-1 whitespace-nowrap ${demo ? 'bg-ink-700 text-ink-400' : configured ? 'bg-ok/20 text-ok' : 'bg-warn/20 text-warn'}`}>
                 {demo ? 'Demo mode' : status === null ? (err ? 'Unknown' : 'Checking...') : configured ? 'Configured' : 'Not configured'}

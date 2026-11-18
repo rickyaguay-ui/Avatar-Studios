@@ -12,7 +12,8 @@
     "lint": "tsc --noEmit",
     "build:demo": "vite build --mode demo",
     "preview:demo": "vite preview --outDir dist-demo",
-    "check:assets": "node scripts/check-assets.mjs"
+    "check:assets": "node scripts/check-assets.mjs",
+    "test": "tsx --test src/live/live.test.ts"
   },
   "dependencies": {
     "@dicebear/core": "^10.7.0",

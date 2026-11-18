@@ -116,7 +116,7 @@ export function AndroidFrame({ ex, cue, avatarSvg, portrait, playing, onStep, on
               <div className="w-12 h-14 rounded-md overflow-hidden border border-gold-400 shrink-0">
                 <Img src={portrait} alt="Host portrait" className="w-full h-full object-cover object-[50%_68%]" />
               </div>
-              <p className="text-[10px] text-ink-50 leading-snug">{active ? active.text : 'Shelter, heat, power, water, waste, and food. One app.'}</p>
+              <p className="text-[10px] text-ink-50 leading-snug">{active ? active.text : ((x as { fallback?: string }).fallback ?? 'Shelter, heat, power, water, waste, and food. One app.')}</p>
             </div>
             <div className="grid grid-cols-3 gap-1">
               {x.cards.map((c) => {
@@ -140,13 +140,13 @@ export function AndroidFrame({ ex, cue, avatarSvg, portrait, playing, onStep, on
 
 /* ---------- PWA web 16:9 browser ---------- */
 export function PwaFrame({ ex, cue, avatarSvg, portrait, playing }: FrameProps) {
-  const x = ex.extra as { headline: string; subhead: string; cards: { title: string; text: string }[]; caveat: string };
+  const x = ex.extra as { headline: string; subhead: string; cards: { title: string; text: string }[]; caveat: string; url?: string };
   const idx = ex.cues.indexOf(cue);
   return (
     <div className="rounded-xl border-4 border-ink-600 bg-ink-900 overflow-hidden" style={{ width: 560, maxWidth: '100%' }}>
       <div className="flex items-center gap-2 bg-ink-800 px-3 py-1.5">
         <span className="w-2.5 h-2.5 rounded-full bg-ink-600" /><span className="w-2.5 h-2.5 rounded-full bg-ink-600" /><span className="w-2.5 h-2.5 rounded-full bg-ink-600" />
-        <div className="flex-1 bg-ink-950 rounded text-[10px] text-ink-400 px-2 py-0.5 ml-2">https://rbhomesteading.example</div>
+        <div className="flex-1 bg-ink-950 rounded text-[10px] text-ink-400 px-2 py-0.5 ml-2">{x.url ?? 'https://rbhomesteading.example'}</div>
       </div>
       <div className="relative overflow-hidden" style={{ aspectRatio: '16 / 9' }}>
         <Backdrop ex={ex} playing={playing} />
@@ -167,7 +167,7 @@ export function PwaFrame({ ex, cue, avatarSvg, portrait, playing }: FrameProps) 
           <div key={c.title} className="rounded-md bg-ink-800 border border-ink-700 p-2"><div className="text-[11px] font-semibold text-gold-300">{c.title}</div><div className="text-[9px] text-ink-200 leading-snug">{c.text}</div></div>
         ))}
       </div>
-      <div className="px-3 pb-2 text-[9px] text-ink-400">{x.caveat}</div>
+      {x.caveat && <div className="px-3 pb-2 text-[9px] text-ink-400">{x.caveat}</div>}
     </div>
   );
 }
