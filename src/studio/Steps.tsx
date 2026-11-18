@@ -13,6 +13,7 @@ import { usePlayer } from './usePlayer';
 import integrations from '../demo/bundles/integrations.json';
 import { svgToDataUrl, userExample } from '../live/neutral';
 import { LIVE_INTEGRATIONS } from '../live/integrations';
+import { LiveBackdropPanel } from '../live/LiveBackdrop';
 
 const FORMAT_BLURB: Record<FormatId, string> = {
   android: 'Native app intro: system splash, then three onboarding cards.',
@@ -64,7 +65,7 @@ export function FormatStep() {
         <div className="flex justify-center items-start p-4 rounded-xl bg-ink-900 border border-ink-700 min-h-[400px]">
           <Frame ex={frameEx} cue={cue} avatarSvg={svg} portrait={portrait} playing={false} showSafe={false} />
         </div>
-        {APP_MODE === 'live' && <BackdropPanel />}
+        {APP_MODE === 'live' && <LiveBackdropPanel />}
       </div>
     </div>
   );
@@ -314,7 +315,7 @@ export function PreviewStep() {
         )}
       </div>
       <div className="flex flex-col gap-6">
-      <BackdropPanel />
+      {APP_MODE === 'live' ? <LiveBackdropPanel /> : <BackdropPanel />}
       <Panel title={APP_MODE === 'live' ? 'Your script' : 'Script'}>
         <ol className="flex flex-col gap-2 text-sm">
           {ex.cues.map((c, i) => (
@@ -345,7 +346,7 @@ export function ExportStep() {
     'Script:', ...ex.cues.map((c) => `  [${c.at}s] VO: ${c.voiceover || '(none)'}\n        On screen: ${c.onScreen}`), '',
     'Avatar (DiceBear Open Peeps):', JSON.stringify(avatar, null, 2), '',
     'Assets:', ...(APP_MODE === 'live'
-      ? [`  portrait: ${s.portrait ? 'generated or starter portrait from the Avatar step' : 'customizer avatar from the Avatar step'}`, `  backdrop: ${s.backdrop ?? '(none chosen)'}`]
+      ? [`  portrait: ${s.portrait ? 'generated or starter portrait from the Avatar step' : 'customizer avatar from the Avatar step'}`, `  backdrop: ${s.backdropPrompt ? `AI scene (Cloudflare FLUX): ${s.backdropPrompt}` : (s.backdrop ?? '(none chosen)')}`]
       : [`  portrait: ${ex.portraits[s.host]}`, `  video: ${ex.video}`, `  voice: ${ex.voices[s.host]}`]),
   ].join('\n');
   const specText = specsToText(s.format) + (s.format === 'pwa' ? `\n\nManifest snippet:\n${pwaManifestSnippet(ex.brand)}` : '');
@@ -362,6 +363,15 @@ export function ExportStep() {
           <Button primary onClick={() => copy('Prompt bundle', bundle)}>Copy prompt bundle</Button>
           <Button onClick={() => copy('Specs', specText)}>Copy specs</Button>
         </div>
+        {APP_MODE === 'live' && s.backdropPrompt && s.backdrop && (
+          <div className="mt-4 flex items-center gap-3">
+            <img src={s.backdrop} alt="Your AI scene" className="w-40 aspect-video object-cover rounded border border-ink-700" />
+            <div className="text-xs text-ink-400 flex flex-col gap-2">
+              <span>Your AI scene (widescreen JPEG). It is the backdrop in your Preview.</span>
+              <a href={s.backdrop} download="avatar-studios-scene.jpg" className="self-start px-3 py-1.5 rounded-md text-sm font-semibold bg-ink-700 text-ink-50 hover:bg-ink-600 border border-ink-600">Download scene</a>
+            </div>
+          </div>
+        )}
         {msg && <p role="status" className="text-sm text-ok mt-3">{msg}</p>}
       </Panel>
       <div className="grid lg:grid-cols-2 gap-6">

@@ -15,6 +15,8 @@ export interface Provider {
   getExample(format: FormatId): FormatExample;
   getIntegrationStatus(): Promise<Result<IntegrationStatus>>;
   generatePortrait(req: PortraitRequest): Promise<Result<{ imageUrl: string }>>;
+  /** Live mode only: an AI backdrop/scene from a prompt. Demo has none. */
+  generateBackdrop?(prompt: string): Promise<Result<{ imageUrl: string }>>;
   /** Returns an audio URL for the narration. Demo: the committed clip. Live: ElevenLabs via the server. */
   speak(req: SpeakRequest): Promise<Result<{ audioUrl: string }>>;
 }

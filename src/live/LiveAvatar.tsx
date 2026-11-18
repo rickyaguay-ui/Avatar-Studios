@@ -3,7 +3,8 @@ import type { HostId } from '../types';
 import { provider } from '../services/provider';
 import { currentOption, hairColorWorks, setOption } from '../studio/avatar';
 import { Button, Img, Panel } from '../studio/Media';
-import { BackdropPanel, StarterAvatarsPanel } from '../studio/StarterPanels';
+import { StarterAvatarsPanel } from '../studio/StarterPanels';
+import { LiveBackdropPanel } from './LiveBackdrop';
 import { FIELDS, HOSTS, useCurrent } from '../studio/Steps';
 import { useDictation } from './dictation';
 import { BLANKS, DEFAULT_FORM, PRESETS, buildPortraitPrompt, type BlankDef, type PortraitForm } from './portraitOptions';
@@ -150,7 +151,7 @@ export function LiveAvatarStep() {
 
       <div className="grid lg:grid-cols-[3fr_2fr] gap-6 items-start">
         <StarterAvatarsPanel />
-        <BackdropPanel />
+        <LiveBackdropPanel />
       </div>
 
       <Button primary className="self-start" onClick={() => d({ t: 'step', step: 'voice' })}>Next: Voice</Button>

@@ -515,6 +515,26 @@ app.post('/api/generate-image', async (req, res) => {
   }
 });
 
+// 2b. AI backdrops / scenes: same Cloudflare account, token and FLUX schnell model as the portraits.
+// The key stays on the server. FLUX schnell has no size control (it returns 1024x1024); the client crops to 16:9.
+app.post('/api/generate-backdrop', async (req, res) => {
+  const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
+  if (!prompt) return res.status(400).json({ error: 'Prompt is required' });
+  if (prompt.length > 1500) return res.status(400).json({ error: 'Prompt is too long (max 1500 characters)' });
+  if (!cloudflareConfigured()) {
+    return res.status(503).json({ error: 'Image generation is not configured. Add CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN.' });
+  }
+  try {
+    const started = Date.now();
+    const imageUrl = await generateWithCloudflare(prompt);
+    console.log(`[backdrop] provider=cloudflare ${Date.now() - started}ms`);
+    res.json({ imageUrl, provider: 'cloudflare', width: 1024, height: 1024 });
+  } catch (error: any) {
+    console.error('Backdrop generation error:', error?.message || error);
+    res.status(500).json({ error: error?.message || 'Failed to generate backdrop' });
+  }
+});
+
 // 3. Audio Transcription (gemini-3.5-transcribe)
 app.post('/api/transcribe-audio', async (req, res) => {
   try {

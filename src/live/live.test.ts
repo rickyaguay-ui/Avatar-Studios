@@ -41,3 +41,28 @@ test('no Gemini or Hedra wording in anything Live mode shows', () => {
   assert.doesNotMatch(text, /gemini|hedra/i);
   assert.deepEqual(LIVE_INTEGRATIONS.map((i) => i.id), ['cloudflare', 'elevenlabs']);
 });
+
+import { SCENE_CHIPS, buildScenePrompt, widescreenCrop } from './scene';
+
+test('scene prompt is a wide, empty, people-free backdrop prompt', () => {
+  const p = buildScenePrompt('  a sunlit greenhouse.  ');
+  assert.match(p, /^Wide cinematic background scene: a sunlit greenhouse\./);
+  assert.match(p, /No people, no text, no logos\.$/);
+});
+
+test('quick scene chips are unique and non-empty', () => {
+  assert.ok(SCENE_CHIPS.length >= 6);
+  assert.equal(new Set(SCENE_CHIPS.map((c) => c.label)).size, SCENE_CHIPS.length);
+  for (const c of SCENE_CHIPS) assert.ok(c.text.length > 10);
+});
+
+test('widescreen crop is a centered 16:9 window', () => {
+  assert.deepEqual(widescreenCrop(1024, 1024), { sx: 0, sy: 224, sw: 1024, sh: 576 });
+  assert.deepEqual(widescreenCrop(1920, 1080), { sx: 0, sy: 0, sw: 1920, sh: 1080 });
+  const c = widescreenCrop(1000, 400);
+  assert.ok(Math.abs(c.sw / c.sh - 16 / 9) < 0.01);
+});
+
+test('no Gemini or Hedra wording in scene chips', () => {
+  assert.doesNotMatch(JSON.stringify(SCENE_CHIPS), /gemini|hedra/i);
+});
