@@ -6,7 +6,7 @@ import { provider } from '../services/provider';
  * Intro playback clock. Audio drives the clock when a clip is loaded (cue times are scaled to the
  * real clip length); otherwise a timer does. The browser speech fallback is never used.
  */
-export function usePlayer(ex: FormatExample, host: HostId) {
+export function usePlayer(ex: FormatExample, host: HostId, voiceId?: string) {
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -26,13 +26,13 @@ export function usePlayer(ex: FormatExample, host: HostId) {
   useEffect(() => {
     stop(); setT(0); clockRef.current = 0; setNotice(null);
     audioRef.current = null; urlRef.current = null;
-  }, [ex.id, host, stop]);
+  }, [ex.id, host, voiceId, narration, stop]);
 
   const loadAudio = useCallback(async () => {
-    const key = `${ex.id}:${host}`;
+    const key = `${ex.id}:${host}:${voiceId ?? ''}:${narration}`;
     let url = cache.current.get(key);
     if (!url) {
-      const r = await provider.speak({ format: ex.id, host, text: narration });
+      const r = await provider.speak({ format: ex.id, host, text: narration, ...(voiceId ? { voiceId } : {}) });
       if (!r.ok) { setNotice(r.message); return null; }
       url = r.data.audioUrl;
       cache.current.set(key, url);
@@ -44,7 +44,7 @@ export function usePlayer(ex: FormatExample, host: HostId) {
       audioRef.current = a; urlRef.current = url;
     }
     return audioRef.current;
-  }, [ex.id, host, narration]);
+  }, [ex.id, host, voiceId, narration]);
 
   const scale = () => {
     const a = audioRef.current;

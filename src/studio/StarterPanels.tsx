@@ -4,7 +4,7 @@ import { useStudio } from './state';
 import { STARTER_AVATARS, STARTER_BACKDROPS, STARTER_STYLES } from './starterAssets';
 
 /** Pick one of ten starter avatars. It becomes the portrait shown in the preview frames. */
-export function StarterAvatarsPanel() {
+export function StarterAvatarsPanel({ resetLabel = 'Back to the host portrait' }: { resetLabel?: string }) {
   const { s, d } = useStudio();
   const [filter, setFilter] = useState<string>('All');
   const list = STARTER_AVATARS.filter((a) => filter === 'All' || a.style === filter);
@@ -29,7 +29,7 @@ export function StarterAvatarsPanel() {
           );
         })}
       </div>
-      {s.portrait && <Button className="mt-3" onClick={() => d({ t: 'portrait', url: null })}>Back to the host portrait</Button>}
+      {s.portrait && <Button className="mt-3" onClick={() => d({ t: 'portrait', url: null })}>{resetLabel}</Button>}
     </Panel>
   );
 }

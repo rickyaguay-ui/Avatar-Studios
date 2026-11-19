@@ -5,6 +5,7 @@ import http from 'http';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { WebSocketServer, WebSocket } from 'ws';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -12,6 +13,19 @@ const app = express();
 const port = 3000;
 
 app.use(express.json({ limit: '50mb' }));
+
+// Optional shared access code for the hosted Live deployment. Skipped when APP_ACCESS_CODE is unset.
+function sha256(v: string): Buffer {
+  return crypto.createHash('sha256').update(v).digest();
+}
+app.use('/api', (req, res, next) => {
+  const expected = process.env.APP_ACCESS_CODE;
+  if (!expected) return next();
+  if (req.method === 'GET' && req.path === '/integrations/status') return next();
+  const sent = req.get('x-access-code') || '';
+  if (crypto.timingSafeEqual(sha256(sent), sha256(expected))) return next();
+  return res.status(401).json({ error: 'Access code required' });
+});
 
 // Lazy GoogleGenAI initialization
 let aiClient: GoogleGenAI | null = null;
@@ -286,23 +300,83 @@ function cloudflareConfigured(): boolean {
   return !!(process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN);
 }
 
-async function generateWithCloudflare(prompt: string): Promise<string> {
-  const account = process.env.CLOUDFLARE_ACCOUNT_ID;
-  const token = process.env.CLOUDFLARE_API_TOKEN;
-  const resp = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/@cf/black-forest-labs/flux-1-schnell`,
-    {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: prompt.slice(0, 2048), steps: 4 }),
-    },
-  );
-  const json: any = await resp.json().catch(() => null);
-  if (!resp.ok || !json?.result?.image) {
-    const msg = json?.errors?.[0]?.message || `HTTP ${resp.status}`;
-    throw new Error(`Cloudflare image generation failed: ${msg}`);
+const CF_SCHNELL = '@cf/black-forest-labs/flux-1-schnell';
+// FLUX.2 klein (Workers AI, Cloudflare-hosted): supports width/height, seed and a reference image for true editing.
+// FLUX schnell's REST schema rejects seed, width and height, so it is only the fallback.
+const CF_KLEIN = '@cf/black-forest-labs/flux-2-klein-4b';
+
+function cfUrl(model: string): string {
+  return `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/${model}`;
+}
+
+function clampDim(n: unknown, fallback: number): number {
+  const v = typeof n === 'number' && Number.isFinite(n) ? Math.round(n / 16) * 16 : fallback;
+  return Math.min(1536, Math.max(256, v));
+}
+
+function clampSeed(n: unknown): number | undefined {
+  return typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= 2147483647 ? n : undefined;
+}
+
+function toDataUrl(b64: string): string {
+  const mime = b64.startsWith('iVBOR') ? 'image/png' : 'image/jpeg';
+  return `data:${mime};base64,${b64}`;
+}
+
+function dataUrlToBlob(dataUrl: string): Blob | null {
+  const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl);
+  if (!m) return null;
+  return new Blob([Buffer.from(m[2], 'base64')], { type: m[1] });
+}
+
+/** FLUX.2 klein: text-to-image, or true image editing when `image` (a data URL) is given. */
+async function cloudflareKlein(opts: { prompt: string; width: number; height: number; seed?: number; image?: string }): Promise<string> {
+  const fd = new FormData();
+  fd.append('prompt', opts.prompt.slice(0, 2048));
+  fd.append('width', String(opts.width));
+  fd.append('height', String(opts.height));
+  if (opts.seed !== undefined) fd.append('seed', String(opts.seed));
+  if (opts.image) {
+    const blob = dataUrlToBlob(opts.image);
+    if (!blob) throw new Error('The image to edit must be a JPEG, PNG or WebP data URL');
+    fd.append('input_image_0', blob, 'input');
   }
-  return `data:image/jpeg;base64,${json.result.image}`;
+  const resp = await fetch(cfUrl(CF_KLEIN), { method: 'POST', headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}` }, body: fd });
+  const json: any = await resp.json().catch(() => null);
+  if (!resp.ok || !json?.result?.image) throw new Error(`FLUX.2 klein failed: ${json?.errors?.[0]?.message || `HTTP ${resp.status}`}`);
+  return toDataUrl(json.result.image);
+}
+
+/** FLUX.1 schnell: the original free model. Square only, no seed. */
+async function cloudflareSchnell(prompt: string): Promise<string> {
+  const resp = await fetch(cfUrl(CF_SCHNELL), {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: prompt.slice(0, 2048), steps: 4 }),
+  });
+  const json: any = await resp.json().catch(() => null);
+  if (!resp.ok || !json?.result?.image) throw new Error(`Cloudflare image generation failed: ${json?.errors?.[0]?.message || `HTTP ${resp.status}`}`);
+  return toDataUrl(json.result.image);
+}
+
+export interface CfImage { imageUrl: string; model: 'flux-2-klein-4b' | 'flux-1-schnell'; width: number; height: number; seed?: number; seedHonored: boolean }
+
+/** Portraits and scenes: klein first (seed + exact size), schnell as the fallback. */
+async function generateCloudflareImage(opts: { prompt: string; width?: number; height?: number; seed?: number }): Promise<CfImage> {
+  const width = clampDim(opts.width, 1024);
+  const height = clampDim(opts.height, 1024);
+  try {
+    const imageUrl = await cloudflareKlein({ prompt: opts.prompt, width, height, seed: opts.seed });
+    return { imageUrl, model: 'flux-2-klein-4b', width, height, seed: opts.seed, seedHonored: opts.seed !== undefined };
+  } catch (err: any) {
+    console.warn('FLUX.2 klein failed, falling back to FLUX.1 schnell:', err?.message || err);
+    const imageUrl = await cloudflareSchnell(opts.prompt);
+    return { imageUrl, model: 'flux-1-schnell', width: 1024, height: 1024, seedHonored: false };
+  }
+}
+
+async function generateWithCloudflare(prompt: string): Promise<string> {
+  return (await generateCloudflareImage({ prompt })).imageUrl;
 }
 
 function isGeminiAccessError(err: any): boolean {
@@ -333,11 +407,15 @@ app.post('/api/generate-image', async (req, res) => {
     const hasImage = !!(req.body?.sourceImageUrl || req.body?.referenceImageUrl);
     if (hasImage) console.log('Cloudflare FLUX is text-only: ignoring the reference/source image.');
     const started = Date.now();
-    const imageUrl = await generateWithCloudflare(buildCloudflarePrompt(req.body));
-    console.log(`[image] provider=cloudflare (${reason}) ${Date.now() - started}ms`);
+    const cf = await generateCloudflareImage({
+      prompt: buildCloudflarePrompt(req.body),
+      width: req.body?.width, height: req.body?.height, seed: clampSeed(req.body?.seed),
+    });
+    console.log(`[image] provider=cloudflare model=${cf.model} (${reason}) ${Date.now() - started}ms`);
     return res.json({
-      imageUrl,
+      imageUrl: cf.imageUrl,
       provider: 'cloudflare',
+      model: cf.model, width: cf.width, height: cf.height, seed: cf.seed, seedHonored: cf.seedHonored,
       prompt: req.body.prompt,
       imageSize: req.body.imageSize || '1K',
       aspectRatio: req.body.aspectRatio || '16:9',
@@ -350,7 +428,7 @@ app.post('/api/generate-image', async (req, res) => {
   const preferCloudflare =
     cloudflareOk &&
     req.body?.prompt &&
-    (!geminiOk || (process.env.IMAGE_PROVIDER === 'cloudflare' && !wantsImage));
+    (!geminiOk || req.body?.provider === 'cloudflare' || (process.env.IMAGE_PROVIDER === 'cloudflare' && !wantsImage));
   if (preferCloudflare) {
     try {
       return await sendCloudflare(geminiOk ? 'IMAGE_PROVIDER=cloudflare' : 'Gemini not configured');
@@ -498,6 +576,52 @@ app.post('/api/generate-image', async (req, res) => {
     res.status(500).json({
       error: error?.message || 'Failed to generate image',
     });
+  }
+});
+
+// 2b. AI backdrops / scenes: same Cloudflare account, token and FLUX schnell model as the portraits.
+// The key stays on the server. FLUX schnell has no size control (it returns 1024x1024); the client crops to 16:9.
+app.post('/api/generate-backdrop', async (req, res) => {
+  const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
+  if (!prompt) return res.status(400).json({ error: 'Prompt is required' });
+  if (prompt.length > 1500) return res.status(400).json({ error: 'Prompt is too long (max 1500 characters)' });
+  if (!cloudflareConfigured()) {
+    return res.status(503).json({ error: 'Image generation is not configured. Add CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN.' });
+  }
+  try {
+    const started = Date.now();
+    const cf = await generateCloudflareImage({ prompt, width: req.body?.width ?? 1024, height: req.body?.height ?? 576, seed: clampSeed(req.body?.seed) });
+    console.log(`[backdrop] provider=cloudflare model=${cf.model} ${Date.now() - started}ms`);
+    res.json({ imageUrl: cf.imageUrl, provider: 'cloudflare', model: cf.model, width: cf.width, height: cf.height, seed: cf.seed, seedHonored: cf.seedHonored });
+  } catch (error: any) {
+    console.error('Backdrop generation error:', error?.message || error);
+    res.status(500).json({ error: error?.message || 'Failed to generate backdrop' });
+  }
+});
+
+// 2c. True image editing from an instruction: FLUX.2 klein with the current image as the reference.
+// Same Cloudflare account and token. No fallback here: the client falls back to a same-seed regeneration.
+app.post('/api/edit-image', async (req, res) => {
+  const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
+  const image = typeof req.body?.image === 'string' ? req.body.image : '';
+  if (!prompt) return res.status(400).json({ error: 'Instruction is required' });
+  if (prompt.length > 1500) return res.status(400).json({ error: 'Instruction is too long (max 1500 characters)' });
+  if (!dataUrlToBlob(image)) return res.status(400).json({ error: 'An image (JPEG, PNG or WebP data URL) is required' });
+  if (image.length > 6_000_000) return res.status(400).json({ error: 'Image is too large to edit' });
+  if (!cloudflareConfigured()) {
+    return res.status(503).json({ error: 'Image editing is not configured. Add CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN.', code: 'edit_unavailable' });
+  }
+  try {
+    const started = Date.now();
+    const width = clampDim(req.body?.width, 1024);
+    const height = clampDim(req.body?.height, 1024);
+    const seed = clampSeed(req.body?.seed);
+    const imageUrl = await cloudflareKlein({ prompt, width, height, seed, image });
+    console.log(`[edit] provider=cloudflare model=flux-2-klein-4b ${Date.now() - started}ms`);
+    res.json({ imageUrl, provider: 'cloudflare', model: 'flux-2-klein-4b', method: 'edit', width, height, seed });
+  } catch (error: any) {
+    console.error('Image edit error:', error?.message || error);
+    res.status(502).json({ error: error?.message || 'Image editing is unavailable', code: 'edit_unavailable' });
   }
 });
 
@@ -1338,4 +1462,9 @@ async function startServer() {
   });
 }
 
-startServer();
+// On Vercel the app is exported as a serverless handler; locally it starts its own server.
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;

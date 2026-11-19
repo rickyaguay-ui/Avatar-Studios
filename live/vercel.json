@@ -1,0 +1,7 @@
+{
+  "framework": null,
+  "installCommand": "cd .. && npm ci",
+  "buildCommand": "cd .. && npx vite build --outDir live/dist --emptyOutDir",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }]
+}

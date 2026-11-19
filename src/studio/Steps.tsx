@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormatId, HostId, IntegrationInfo } from '../types';
 import { provider, APP_MODE } from '../services/provider';
 import { FORMAT_ORDER } from '../services/examples';
@@ -11,31 +11,44 @@ import { BackdropPanel, StarterAvatarsPanel } from './StarterPanels';
 import { ELEVEN_VOICES } from './voices';
 import { usePlayer } from './usePlayer';
 import integrations from '../demo/bundles/integrations.json';
+import { userExample } from '../live/neutral';
+import { SQUARE_LABELS, resolveNarrator } from '../live/narrator';
+import { NarratorBadge, SquarePicker } from '../live/NarratorPanel';
+import { LIVE_INTEGRATIONS } from '../live/integrations';
+import { LiveBackdropPanel } from '../live/LiveBackdrop';
+import { ExportFiles } from '../live/ExportFiles';
 
 const FORMAT_BLURB: Record<FormatId, string> = {
   android: 'Native app intro: system splash, then three onboarding cards.',
   pwa: 'Web / PWA landing page in a 16:9 browser frame with an install button.',
   tiktok: 'Vertical 9:16 short for TikTok / Reels with a configurable safe-zone overlay.',
 };
-const HOSTS: Record<HostId, { name: string; blurb: string }> = {
+export const HOSTS: Record<HostId, { name: string; blurb: string }> = {
   mesa: { name: 'Mesa', blurb: 'Woman, late 30s, calm and clear. Explains the why.' },
   reed: { name: 'Reed', blurb: 'Man, 40s, warm and direct. Explains the how.' },
 };
 
-function useCurrent() {
+export function useCurrent() {
   const { s, d } = useStudio();
-  const ex = provider.getExample(s.format);
+  const live = APP_MODE === 'live';
+  const exBase = provider.getExample(s.format);
+  // Live mode: the script, timing and captions come from what the user wrote. Demo mode: the built-in example.
+  const ex = live ? userExample(exBase, s.script) : exBase;
   const avatar = s.avatars[s.format];
   const svg = useMemo(() => renderAvatar(avatar), [avatar]);
-  const portrait = s.portrait ?? ex.portraits[s.host];
+  // Live mode: the narrator is the user's own avatar (generated/starter portrait, else the customized avatar) and is an
+  // empty placeholder until they build one. Never a Mesa/Reed or stock face. Demo keeps its example portrait.
+  const narrator = resolveNarrator(s, svg);
+  const portrait = live ? (narrator.src ?? '') : (s.portrait ?? ex.portraits[s.host]);
+  const liveFrame = live ? { narrator: narrator.src, square: narrator.squareSrc, showSquare: narrator.showSquare } : undefined;
   // A chosen backdrop replaces the picture in the frame only. Script, timing and export text keep using `ex`.
   const frameEx = s.backdrop ? { ...ex, backdrop: s.backdrop, video: undefined } : ex;
-  return { s, d, ex, frameEx, avatar, svg, portrait };
+  return { s, d, ex, exBase, frameEx, avatar, svg, portrait, liveFrame, narrator };
 }
 
 /* ---------------- 1. Format ---------------- */
 export function FormatStep() {
-  const { s, d, ex, frameEx, svg, portrait } = useCurrent();
+  const { s, d, ex, frameEx, svg, portrait, liveFrame } = useCurrent();
   const cue = ex.cues[Math.min(1, ex.cues.length - 1)];
   return (
     <div className="grid lg:grid-cols-[320px_1fr] gap-6">
@@ -54,15 +67,18 @@ export function FormatStep() {
         </div>
         <Button primary className="mt-4 w-full" onClick={() => d({ t: 'step', step: 'avatar' })}>Next: Avatar</Button>
       </Panel>
-      <div className="flex justify-center items-start p-4 rounded-xl bg-ink-900 border border-ink-700 min-h-[400px]">
-        <Frame ex={frameEx} cue={cue} avatarSvg={svg} portrait={portrait} playing={false} showSafe={false} />
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-center items-start p-4 rounded-xl bg-ink-900 border border-ink-700 min-h-[400px]">
+          <Frame ex={frameEx} cue={cue} avatarSvg={svg} portrait={portrait} playing={false} showSafe={false} live={liveFrame} />
+        </div>
+        {APP_MODE === 'live' && <LiveBackdropPanel />}
       </div>
     </div>
   );
 }
 
 /* ---------------- 2. Avatar ---------------- */
-const FIELDS: { field: Parameters<typeof setOption>[1]; label: string; list: string[]; color?: boolean; none?: boolean }[] = [
+export const FIELDS: { field: Parameters<typeof setOption>[1]; label: string; list: string[]; color?: boolean; none?: boolean }[] = [
   { field: 'head', label: 'Head / hair', list: AVATAR_CHOICES.head },
   { field: 'expression', label: 'Expression', list: AVATAR_CHOICES.expression },
   { field: 'facialHair', label: 'Facial hair', list: AVATAR_CHOICES.facialHair, none: true },
@@ -74,7 +90,7 @@ const FIELDS: { field: Parameters<typeof setOption>[1]; label: string; list: str
 
 export function AvatarStep() {
   const { s, d, ex, avatar, svg } = useCurrent();
-  const [form, setForm] = useState({ hairstyle: 'short dark', clothing: 'canvas work jacket', bodyType: 'average', framing: 'bust', artStyle: 'soft illustration' });
+  const [form, setForm] = useState({ hairstyle: 'short dark', clothing: 'canvas work jacket', bodyType: 'average', framing: 'bust', artStyle: 'photorealistic photo' });
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const live = APP_MODE === 'live';
@@ -121,7 +137,7 @@ export function AvatarStep() {
           </div>
         </Panel>
 
-        <Panel title={live ? 'AI portrait builder (Gemini)' : 'Portraits (curated set)'}>
+        <Panel title={live ? 'AI portrait builder' : 'Portraits (curated set)'}>
           <div className="grid grid-cols-2 gap-3 mb-4">
             {(['mesa', 'reed'] as HostId[]).map((h) => (
               <button key={h} onClick={() => { d({ t: 'host', host: h }); }} aria-pressed={s.host === h && !s.portrait}
@@ -141,7 +157,7 @@ export function AvatarStep() {
           </div>
           <div className="flex items-center gap-3 mt-3">
             <Button disabled={!live || busy} onClick={generate}>{busy ? 'Generating...' : 'Generate portrait'}</Button>
-            <span className="text-xs text-ink-400">{live ? 'Calls Gemini through the server.' : 'Demo mode: builder is disabled and shows the curated set.'}</span>
+            <span className="text-xs text-ink-400">{live ? 'Generates the portrait on the server.' : 'Demo mode: builder is disabled and shows the curated set.'}</span>
           </div>
           {msg && <p role="alert" className="text-sm text-warn mt-2">{msg}</p>}
           {s.portrait && <div className="mt-3"><Img src={s.portrait} alt="Selected portrait" className="h-40 rounded" /></div>}
@@ -156,7 +172,7 @@ export function AvatarStep() {
 
 /* ---------------- 3. Voice ---------------- */
 export function VoiceStep() {
-  const { s, d, ex } = useCurrent();
+  const { s, d, exBase: ex } = useCurrent();
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
@@ -164,10 +180,33 @@ export function VoiceStep() {
   const demo = APP_MODE === 'demo';
   // The picked ElevenLabs voice: an extra voice (voiceId) or the base voice of the selected host.
   const picked = ELEVEN_VOICES.find((v) => (s.voiceId ? v.id === s.voiceId : v.host === s.host));
-  const exampleScript = ex.cues.map((c) => c.voiceover).filter(Boolean).slice(0, 2).join(' ');
-  // The script box. It starts as the picked voice's announcement and resets when you pick another voice.
-  const [script, setScript] = useState(picked?.intro ?? '');
-  useEffect(() => { setScript(picked?.intro ?? ''); }, [picked?.id]);
+  // The script box. Demo starts from the voice's announcement. Live starts empty (the user writes their own) and never overwrites their text.
+  const [script, setScript] = useState(demo ? (picked?.intro ?? '') : '');
+  useEffect(() => { if (demo) setScript(picked?.intro ?? ''); }, [picked?.id]);
+  // Live mode: share the script so the Preview plays what the user wrote here.
+  useEffect(() => { if (!demo) d({ t: 'script', text: script }); }, [script, demo]);
+
+  // Dictation: the browser's built-in speech recognition (no API key). Hidden where the browser lacks it.
+  const SR = typeof window !== 'undefined' ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : undefined;
+  const rec = useRef<any>(null);
+  const [listening, setListening] = useState(false);
+  const dictate = () => {
+    if (!SR) return;
+    if (listening) { rec.current?.stop(); return; }
+    setMsg(null);
+    const r = new SR();
+    r.lang = 'en-US'; r.continuous = true; r.interimResults = false;
+    r.onresult = (e: any) => {
+      let t = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) t += e.results[i][0].transcript;
+      if (t.trim()) setScript((p) => ((p.trim() ? p.trimEnd() + ' ' : '') + t.trim()).slice(0, 500));
+    };
+    r.onerror = (e: any) => { setMsg(e?.error === 'not-allowed' ? 'Microphone blocked. Allow the microphone for this site and try again.' : `Dictation stopped (${e?.error ?? 'error'}).`); setListening(false); };
+    r.onend = () => setListening(false);
+    rec.current = r;
+    try { r.start(); setListening(true); } catch { setListening(false); }
+  };
+  useEffect(() => () => rec.current?.stop(), []);
 
   const sample = async () => {
     audio?.pause(); setMsg(null);
@@ -186,6 +225,7 @@ export function VoiceStep() {
 
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-6">
+      {!demo && <Panel><NarratorBadge /></Panel>}
       <Panel title="Choose the narrator">
         <div className="grid sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Voice">
           {(Object.keys(HOSTS) as HostId[]).map((h) => (
@@ -221,18 +261,29 @@ export function VoiceStep() {
           })}
         </div>
       </Panel>
-      <Panel title="Script">
+      <Panel title="Your script">
+        {!demo && <p className="text-sm text-ink-200 mb-2">This box is yours. Erase the starting line and write anything you want the voice to say, or press Dictate and speak it.</p>}
         <label className="flex flex-col gap-1 text-xs text-ink-400">
           What {picked ? picked.name : 'the voice'} says
-          <textarea id="voice-script" value={script} onChange={(e) => setScript(e.target.value)} maxLength={500} rows={4} disabled={demo}
-            placeholder="Type what you want the voice to say."
+          <textarea id="voice-script" value={script} onChange={(e) => setScript(e.target.value)} maxLength={500} rows={5} disabled={demo}
+            spellCheck autoCapitalize="sentences" lang="en-US"
+            placeholder="Type or dictate what you want the voice to say."
             className="bg-ink-800 border border-ink-600 rounded px-3 py-2 text-sm text-ink-50 disabled:opacity-50" />
         </label>
+        {!demo && (
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            {SR
+              ? <Button onClick={dictate}>{listening ? 'Stop dictating' : 'Dictate'}</Button>
+              : <span className="text-xs text-ink-400">Dictation is not supported in this browser. Type your script instead.</span>}
+            <Button onClick={() => setScript('')} disabled={!script}>Clear</Button>
+            {listening && <span role="status" className="text-xs text-gold-300">Listening... speak now.</span>}
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-3 mt-3">
           <Button onClick={sample} disabled={busy}>{busy ? 'Working...' : `Play ${picked ? picked.name : HOSTS[s.host].name}'s ${demo ? ex.label + ' clip' : 'script'}`}</Button>
-          {!demo && <Button onClick={() => setScript(exampleScript)}>Use the example narration</Button>}
           <span className="text-xs text-ink-400">{demo ? 'Demo mode plays the pre-recorded clip. Typing a script needs Live mode.' : `${script.length} / 500 characters`}</span>
         </div>
+        {!demo && <p className="text-[11px] text-ink-400 mt-2">Spelling is checked by your browser (red underline). Dictation uses your browser's speech recognition, so no key is needed. These voices are AI-generated.</p>}
         {msg && <p role="alert" className="text-sm text-warn mt-2">{msg}</p>}
       </Panel>
       <Button primary className="self-start" onClick={() => d({ t: 'step', step: 'preview' })}>Next: Preview</Button>
@@ -242,29 +293,36 @@ export function VoiceStep() {
 
 /* ---------------- 4. Preview ---------------- */
 export function PreviewStep() {
-  const { s, d, ex, frameEx, svg, portrait } = useCurrent();
-  const p = usePlayer(ex, s.host);
+  const { s, d, ex, frameEx, svg, portrait, liveFrame } = useCurrent();
+  const p = usePlayer(ex, s.host, s.voiceId ?? undefined);
   const [safe, setSafe] = useState(true);
+  // Live mode previews what the user built; with no script yet there is nothing to play.
+  const noScript = APP_MODE === 'live' && !s.script.trim();
   return (
     <div className="grid lg:grid-cols-[1fr_320px] gap-6">
       <div className="flex flex-col items-center gap-4 p-4 rounded-xl bg-ink-900 border border-ink-700">
-        <Frame ex={frameEx} cue={p.cue} avatarSvg={svg} portrait={portrait} playing={p.playing} showSafe={safe && ex.id === 'tiktok'}
+        <Frame ex={frameEx} cue={p.cue} avatarSvg={svg} portrait={portrait} playing={p.playing} showSafe={safe && ex.id === 'tiktok'} live={liveFrame}
           onStep={p.step} onCue={(i) => i >= 0 && p.seek(ex.cues[i].at)} />
         <div className="w-full max-w-xl rounded-lg bg-black/60 border border-ink-700 px-4 py-3 text-center text-sm text-ink-50 min-h-[3.5rem]" aria-live="polite" aria-label="Captions">
           {p.cue.voiceover || <span className="text-ink-400">(no narration)</span>}
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={() => p.step(-1)} title="Previous step">Back</Button>
-          {p.playing ? <Button primary onClick={p.pause}>Pause</Button> : <Button primary onClick={p.play}>Play</Button>}
+          {p.playing ? <Button primary onClick={p.pause}>Pause</Button> : <Button primary onClick={p.play} disabled={noScript}>Play</Button>}
           <Button onClick={() => p.step(1)} title="Next step">Step</Button>
           {ex.id === 'tiktok' && <label className="text-xs text-ink-400 ml-3 flex items-center gap-1"><input type="checkbox" checked={safe} onChange={(e) => setSafe(e.target.checked)} />Safe zone</label>}
         </div>
         <input type="range" aria-label="Timeline" min={0} max={ex.durationSec} step={0.1} value={p.t} onChange={(e) => p.seek(Number(e.target.value))} className="w-full max-w-xl accent-gold-400" />
         {p.notice && <p role="alert" className="text-sm text-warn">{p.notice}</p>}
+        {noScript && (
+          <p className="text-sm text-gold-300 text-center">This previews what you build. Write your script in the Voice step, then come back and press Play.
+            {' '}<button className="underline" onClick={() => d({ t: 'step', step: 'voice' })}>Go to Voice</button></p>
+        )}
       </div>
       <div className="flex flex-col gap-6">
-      <BackdropPanel />
-      <Panel title="Script">
+      {APP_MODE === 'live' && <SquarePicker />}
+      {APP_MODE === 'live' ? <LiveBackdropPanel /> : <BackdropPanel />}
+      <Panel title={APP_MODE === 'live' ? 'Your script' : 'Script'}>
         <ol className="flex flex-col gap-2 text-sm">
           {ex.cues.map((c, i) => (
             <li key={i}>
@@ -290,10 +348,12 @@ export function ExportStep() {
   const specs = exportSpecs(s.format);
 
   const bundle = [
-    `Brand: ${ex.brand}`, `Format: ${ex.label}`, `Narrator: ${HOSTS[s.host].name}`, '',
+    `Brand: ${ex.brand}`, `Format: ${ex.label}`, `Narrator: ${APP_MODE === 'live' ? (ELEVEN_VOICES.find((v) => (s.voiceId ? v.id === s.voiceId : v.host === s.host))?.name ?? 'ElevenLabs voice') : HOSTS[s.host].name}`, '',
     'Script:', ...ex.cues.map((c) => `  [${c.at}s] VO: ${c.voiceover || '(none)'}\n        On screen: ${c.onScreen}`), '',
     'Avatar (DiceBear Open Peeps):', JSON.stringify(avatar, null, 2), '',
-    'Assets:', `  portrait: ${ex.portraits[s.host]}`, `  video: ${ex.video}`, `  voice: ${ex.voices[s.host]}`,
+    'Assets:', ...(APP_MODE === 'live'
+      ? [`  narrator avatar: ${s.portrait ? 'generated or starter portrait from the Avatar step' : s.customized ? 'customizer avatar from the Avatar step' : '(none built yet)'}`, `  small square: ${SQUARE_LABELS[s.squareMode]}`, `  backdrop: ${s.backdropPrompt ? `AI scene (Cloudflare FLUX): ${s.backdropPrompt}` : (s.backdrop ?? '(none chosen)')}`]
+      : [`  portrait: ${ex.portraits[s.host]}`, `  video: ${ex.video}`, `  voice: ${ex.voices[s.host]}`]),
   ].join('\n');
   const specText = specsToText(s.format) + (s.format === 'pwa' ? `\n\nManifest snippet:\n${pwaManifestSnippet(ex.brand)}` : '');
 
@@ -304,6 +364,7 @@ export function ExportStep() {
 
   return (
     <div className="flex flex-col gap-6">
+      {APP_MODE === 'live' && <Panel><NarratorBadge /><p className="text-xs text-ink-400 mt-2">Small square: {SQUARE_LABELS[s.squareMode]}.</p></Panel>}
       <Panel title={`Export: ${ex.label}`}>
         <div className="flex flex-wrap gap-3">
           <Button primary onClick={() => copy('Prompt bundle', bundle)}>Copy prompt bundle</Button>
@@ -311,6 +372,7 @@ export function ExportStep() {
         </div>
         {msg && <p role="status" className="text-sm text-ok mt-3">{msg}</p>}
       </Panel>
+      {APP_MODE === 'live' && <ExportFiles bundle={bundle} />}
       <div className="grid lg:grid-cols-2 gap-6">
         <Panel title="Expected output by platform">
           <div className="flex flex-col gap-4">
@@ -339,6 +401,10 @@ export function IntegrationsStep() {
   const [status, setStatus] = useState<Record<string, boolean> | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const demo = APP_MODE === 'demo';
+  // Demo reads the Demo bundle untouched. Live uses its own cards (Cloudflare FLUX images + ElevenLabs voice).
+  const cards: { id: string; name: string; powers: string; how: string; envVar: string }[] = APP_MODE === 'demo'
+    ? (integrations as IntegrationInfo[])
+    : LIVE_INTEGRATIONS.map((c) => ({ id: c.id, name: c.name, powers: c.powers, how: c.how, envVar: c.envVars }));
   useEffect(() => {
     if (demo) return;
     provider.getIntegrationStatus().then((r) => (r.ok ? setStatus(r.data) : setErr(r.message)));
@@ -347,7 +413,7 @@ export function IntegrationsStep() {
   return (
     <div className="flex flex-col gap-4 max-w-3xl mx-auto">
       {demo && <p className="rounded-lg border border-gold-700 bg-ink-800 px-4 py-2 text-sm text-gold-300">Demo mode: integrations are shown for reference and are disabled. This site holds no keys and makes no live calls.</p>}
-      {(integrations as IntegrationInfo[]).map((i) => {
+      {cards.map((i) => {
         const configured = status?.[i.id];
         return (
           <Panel key={i.id}>
@@ -356,7 +422,7 @@ export function IntegrationsStep() {
                 <h3 className="font-display text-lg text-ink-50">{i.name}</h3>
                 <p className="text-sm text-ink-200 mt-1"><b>Powers:</b> {i.powers}</p>
                 <p className="text-sm text-ink-400 mt-1"><b>How:</b> {i.how}</p>
-                {!demo && <p className="text-xs text-ink-400 mt-2">Key lives in <code className="text-gold-300">.env</code> as <code className="text-gold-300">{i.envVar}</code>. This app never accepts a key.</p>}
+                {!demo && <p className="text-xs text-ink-400 mt-2">Stored on the server as <code className="text-gold-300">{i.envVar}</code>. This app never accepts a key.</p>}
               </div>
               <span className={`text-xs font-semibold rounded-full px-3 py-1 whitespace-nowrap ${demo ? 'bg-ink-700 text-ink-400' : configured ? 'bg-ok/20 text-ok' : 'bg-warn/20 text-warn'}`}>
                 {demo ? 'Demo mode' : status === null ? (err ? 'Unknown' : 'Checking...') : configured ? 'Configured' : 'Not configured'}

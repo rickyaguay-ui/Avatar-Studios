@@ -1,10 +1,30 @@
-import type { Provider } from './provider';
+import type { Provider, ImageResult } from './provider';
 import type { Result } from '../types';
 import { getExample } from './examples';
+import { neutralExample } from '../live/neutral';
+
+const ACCESS_CODE_KEY = 'avatarStudiosAccessCode';
+
+function readAccessCode(): string {
+  try { return localStorage.getItem(ACCESS_CODE_KEY) || ''; } catch { return ''; }
+}
 
 async function post<T>(url: string, body: unknown, serviceKey: string): Promise<Result<T>> {
   try {
-    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const send = () => {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const code = readAccessCode();
+      if (code) headers['x-access-code'] = code;
+      return fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+    };
+    let res = await send();
+    if (res.status === 401) {
+      const entered = window.prompt('Enter the access code');
+      if (entered) {
+        try { localStorage.setItem(ACCESS_CODE_KEY, entered); } catch { /* ignore */ }
+        res = await send();
+      }
+    }
     const json = await res.json().catch(() => ({}));
     if (res.status === 503 || /not configured|API key/i.test(String(json?.error ?? ''))) {
       return { ok: false, code: 'not_configured', message: `${serviceKey} is not configured. Add its key to .env on the server machine.` };
@@ -19,7 +39,8 @@ async function post<T>(url: string, body: unknown, serviceKey: string): Promise<
 /** Live provider: same interface, calls the server's /api routes. */
 export const liveProvider: Provider = {
   mode: 'live',
-  getExample,
+  // Live mode starts blank: no built-in example script (the Mesa/Reed copy stays in Demo mode only).
+  getExample: (f) => neutralExample(getExample(f)),
   async getIntegrationStatus() {
     try {
       const res = await fetch('/api/integrations/status');
@@ -30,9 +51,21 @@ export const liveProvider: Provider = {
     }
   },
   async generatePortrait(r) {
-    const prompt = `Portrait of a fictional ${r.host === 'mesa' ? 'woman' : 'man'}, ${r.hairstyle} hair, wearing ${r.clothing}, ${r.bodyType} build, ${r.framing} framing, ${r.artStyle} style. Synthetic person, no text, no logos.`;
-    const res = await post<{ imageUrl: string }>('/api/generate-image', { prompt, aspectRatio: '9:16' }, 'Gemini');
+    const who = r.host === 'mesa' ? 'woman in her late 30s, calm and clear expression' : 'man in his 40s, warm and direct expression';
+    const prompt = r.prompt || `Portrait of a fictional ${who}, ${r.hairstyle} hair, wearing ${r.clothing}, ${r.bodyType} build, ${r.framing} framing, ${r.artStyle} style, soft natural window light, neutral studio backdrop, sharp focus, head and shoulders. Synthetic person, no text, no logos.`;
+    const res = await post<{ imageUrl: string }>('/api/generate-image', { prompt, aspectRatio: '9:16' }, 'Image generation');
     return res;
+  },
+  async generateBackdrop(prompt) {
+    return post<{ imageUrl: string }>('/api/generate-backdrop', { prompt }, 'Image generation');
+  },
+  async generateImage({ kind, prompt, seed, width, height }) {
+    return kind === 'scene'
+      ? post<ImageResult>('/api/generate-backdrop', { prompt, seed, width, height }, 'Image generation')
+      : post<ImageResult>('/api/generate-image', { prompt, seed, width, height, provider: 'cloudflare' }, 'Image generation');
+  },
+  async editImage({ prompt, image, seed, width, height }) {
+    return post<ImageResult>('/api/edit-image', { prompt, image, seed, width, height }, 'Image editing');
   },
   async speak({ format, host, text, voiceId }) {
     // voiceId (an ElevenLabs voice picked in the Voice step) wins; otherwise the host's voice from .env is used.
