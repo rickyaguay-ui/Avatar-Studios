@@ -18,7 +18,7 @@ export const GUIDE: Record<StepId, GuideEntry> = {
   avatar: {
     title: '2. Avatar',
     say: 'Design the face. Use the customizer for a drawn avatar, or build a realistic portrait by filling in the blanks: subject, age, skin tone, hair, build, expression, wardrobe, setting, lighting and style. Add your own words or speak them with the mic, then press Generate portrait.',
-    can: ['Customizer: change hair, expression, clothing and more. It updates instantly and costs nothing.', 'AI portrait builder: every blank becomes part of the description. Mesa and Reed are example presets you can load and change.', 'Your own details: type or press the mic to speak extra details, or tick "Use only my text".', 'Starter avatars: click one to use it as the portrait.', 'Backdrops: click one to change the scenery behind the avatar.', 'If the site asks for an access code, enter it once. It is remembered on this device.'],
+    can: ['Customizer: change hair, expression, clothing and more. It updates instantly and costs nothing.', 'AI portrait builder: every blank becomes part of the description. Mesa and Reed are example presets you can load and change.', 'Your own details: type or press the mic to speak extra details, or tick "Use only my text".', 'Starter avatars: click one to use it as the portrait.', 'Your narrator is the avatar you build here. The small square in the frame can show the same avatar, another one, or nothing.','Edit: every generated image has an Edit button, quick refiners, editable prompt fields and Undo, Redo and Use this one for every version.','Backdrops: describe a scene or click a preloaded one to change the scenery behind the avatar.', 'If the site asks for an access code, enter it once. It is remembered on this device.'],
   },
   voice: {
     title: '3. Voice',
@@ -33,7 +33,7 @@ export const GUIDE: Record<StepId, GuideEntry> = {
   export: {
     title: '5. Export',
     say: 'Copy your project out. The prompt bundle holds the script and avatar settings, and the specs list the sizes and formats each platform expects.',
-    can: ['Copy prompt bundle: script, avatar settings and asset names as text.', 'Copy specs: the platform size and format checklist.', 'Paste either one into your video or coding tool.'],
+    can: ['Copy prompt bundle: script, avatar settings and asset names as text.', 'Copy specs: the platform size and format checklist.', 'Name your files: every export has its own file name field, pre-filled from your title and format.', 'Download saves it with that name. Save as lets you pick the folder where your browser supports it.', 'Share opens your phone\'s share sheet (TikTok, Instagram, Drive and more). If your browser can\'t share that file type, it downloads instead and tells you why.'],
   },
   integrations: {
     title: '6. Integrations',

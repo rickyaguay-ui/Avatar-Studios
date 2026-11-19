@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { makeInitial, makeReducer } from '../studio/state';
+import { StudioProvider, makeInitial, makeReducer } from '../studio/state';
 import { resolveNarrator, buildSquarePrompt, SQUARE_LABELS } from './narrator';
 import { TiktokFrame, AndroidFrame, PwaFrame, NarratorCircle } from '../studio/Frames';
 import { neutralExample } from './neutral';
@@ -98,4 +98,13 @@ test('frames: a different square avatar never replaces the narrator circle; "non
 test('NarratorCircle renders an image only when there is an avatar', () => {
   assert.match(renderToStaticMarkup(createElement(NarratorCircle, { src: null, size: 30 })), /No avatar yet/);
   assert.match(renderToStaticMarkup(createElement(NarratorCircle, { src: 'a.jpg', size: 30 })), /src="a\.jpg"/);
+});
+
+import { VoiceStep } from '../studio/Steps';
+
+test('Live Voice step starts with an empty script (no leftover Mesa line) and no example-narration button', () => {
+  const html = renderToStaticMarkup(createElement(StudioProvider, null, createElement(VoiceStep)));
+  assert.doesNotMatch(html, /Hi, I(&#x27;|')m/);
+  assert.doesNotMatch(html, /Use the example narration/);
+  assert.match(html, /<textarea[^>]*id="voice-script"[^>]*>\s*<\/textarea>/);
 });

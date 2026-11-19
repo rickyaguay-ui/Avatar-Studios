@@ -180,10 +180,9 @@ export function VoiceStep() {
   const demo = APP_MODE === 'demo';
   // The picked ElevenLabs voice: an extra voice (voiceId) or the base voice of the selected host.
   const picked = ELEVEN_VOICES.find((v) => (s.voiceId ? v.id === s.voiceId : v.host === s.host));
-  const exampleScript = ex.cues.map((c) => c.voiceover).filter(Boolean).slice(0, 2).join(' ');
-  // The script box. It starts as the picked voice's announcement and resets when you pick another voice.
-  const [script, setScript] = useState(picked?.intro ?? '');
-  useEffect(() => { setScript(picked?.intro ?? ''); }, [picked?.id]);
+  // The script box. Demo starts from the voice's announcement. Live starts empty (the user writes their own) and never overwrites their text.
+  const [script, setScript] = useState(demo ? (picked?.intro ?? '') : '');
+  useEffect(() => { if (demo) setScript(picked?.intro ?? ''); }, [picked?.id]);
   // Live mode: share the script so the Preview plays what the user wrote here.
   useEffect(() => { if (!demo) d({ t: 'script', text: script }); }, [script, demo]);
 
@@ -282,7 +281,6 @@ export function VoiceStep() {
         )}
         <div className="flex flex-wrap items-center gap-3 mt-3">
           <Button onClick={sample} disabled={busy}>{busy ? 'Working...' : `Play ${picked ? picked.name : HOSTS[s.host].name}'s ${demo ? ex.label + ' clip' : 'script'}`}</Button>
-          {!demo && <Button onClick={() => setScript(exampleScript)}>Use the example narration</Button>}
           <span className="text-xs text-ink-400">{demo ? 'Demo mode plays the pre-recorded clip. Typing a script needs Live mode.' : `${script.length} / 500 characters`}</span>
         </div>
         {!demo && <p className="text-[11px] text-ink-400 mt-2">Spelling is checked by your browser (red underline). Dictation uses your browser's speech recognition, so no key is needed. These voices are AI-generated.</p>}
